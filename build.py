@@ -55,7 +55,10 @@ def nav(active=""):
       {a("index.html#process", "How it works", "process")}
       {a("about.html", "About us", "about")}
     </div>
-    <a href="contact.html" class="nav-cta">Contact us</a>
+    <div class="nav-right">
+      <a href="admin.html" class="nav-login">Log in</a>
+      <a href="contact.html" class="nav-cta">Contact us</a>
+    </div>
     <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -65,6 +68,7 @@ def nav(active=""):
     <a href="market.html" onclick="closeMenu()">Commodities</a>
     <a href="index.html#process" onclick="closeMenu()">How it works</a>
     <a href="about.html" onclick="closeMenu()">About us</a>
+    <a href="admin.html" onclick="closeMenu()">Log in</a>
     <a href="contact.html" class="mobile-cta" onclick="closeMenu()">Contact us</a>
   </div>
 """
@@ -92,7 +96,7 @@ FOOT = SCALE_CW + f"""
     </div>
     <div class="foot-bottom">
       <p>&copy; 2026 Kabani Commodities, a brand of Kabani Consulting, Geneva, Switzerland. All rights reserved.</p>
-      <a href="admin.html">Admin</a>
+      <a href="admin.html">Admin login</a>
     </div>
   </footer>
   <script src="firebase-config.js"></script>

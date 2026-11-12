@@ -36,6 +36,10 @@
     }
     .nav-logo span { color: var(--tan); }
     .nav-links { display: flex; align-items: center; gap: 34px; }
+    .nav-right { display: flex; align-items: center; gap: 22px; }
+    .nav-login { font-size: 14px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 8px 4px; transition: color 0.15s; }
+    .nav-login:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+    .nav-login:focus-visible { outline: 3px solid var(--tan-light); outline-offset: 3px; border-radius: 6px; }
     .nav-links a {
       font-size: 14.5px; font-weight: 500; color: var(--ink-soft);
       text-decoration: none; transition: color 0.25s;
@@ -636,7 +640,7 @@
       .page-header { padding: 56px 0 48px; }
     }
     @media (max-width: 640px) {
-      .nav-cta { display: none; }
+      .nav-right { display: none; }
       .nav-logo { font-size: 14px; }
     }
     @media (max-width: 560px) {
