@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only the owner's verified Google account may change anything.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'rb@kabaniconsulting.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function ok(s) { return s is string && s.size() <= 160; }
+
+    // Everyone may read the listings (the public Commodities page shows them).
+    match /listings/{id} {
+      allow read: if true;
+      allow create, update: if isOwner()
+        && request.resource.data.type in ['supply', 'demand']
+        && ok(request.resource.data.commodity)
+        && ok(request.resource.data.volume)
+        && (!('origin' in request.resource.data) || ok(request.resource.data.origin))
+        && (!('when' in request.resource.data) || ok(request.resource.data.when))
+        && (!('port' in request.resource.data) || ok(request.resource.data.port))
+        && (!('country' in request.resource.data) || ok(request.resource.data.country));
+      allow delete: if isOwner();
+    }
+
+    // Marker that tells the public page to show the live listings instead of the built-in ones.
+    match /meta/{id} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+ "_help": "Supply rows are built automatically from sources.json (one row per country and commodity). Add a volume or note for a supply row under supplyDetails, keyed \"<slug>|<Country>\", e.g. \"coffee|Kenya\": {\"volume\": \"40 t per month\"}. Demand rows are listed below; delete the sample ones and add yours. Fields: commodity (slug), volume, when, port, country (destination country, spelled as on the map, e.g. Netherlands). Set \"sample\": true on example rows. Then run: python3 -I build.py",
+ "updated": "2026-11-10",
+ "supplyDetails": {},
+ "demand": [
+  {
+   "commodity": "coffee",
+   "volume": "2 containers",
+   "when": "Q1 2027",
+   "port": "Rotterdam, Netherlands",
+   "sample": true,
+   "country": "Netherlands"
+  },
+  {
+   "commodity": "avocado",
+   "volume": "1 container weekly",
+   "when": "January to March",
+   "port": "Rotterdam, Netherlands",
+   "sample": true,
+   "country": "Netherlands"
+  },
+  {
+   "commodity": "urea",
+   "volume": "5,000 t",
+   "when": "March 2027",
+   "port": "Mombasa, Kenya",
+   "sample": true,
+   "country": "Kenya"
+  }
+ ]
+}

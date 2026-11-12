@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Kabani Commodities</title>
+  <meta name="description" content="Listings admin." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="admin-bar">
+    <a class="nav-logo" href="index.html">Kabani <span>Commodities</span></a>
+    <div class="admin-user" id="admin-user" hidden><span id="admin-email"></span><button type="button" class="panel-showall" id="admin-signout">Sign out</button></div>
+  </header>
+  <main class="admin-page">
+    <div class="section-inner">
+      <h1 class="section-title">Listings <span class="accent">admin</span></h1>
+
+      <section class="admin-card" id="admin-setup" hidden>
+        <h2>Setup needed</h2>
+        <p>The admin needs a free Firebase project. Follow <strong>ADMIN-SETUP.md</strong>, paste the four values into <strong>firebase-config.js</strong>, then rebuild the site.</p>
+      </section>
+
+      <section class="admin-card" id="admin-signin" hidden>
+        <h2>Sign in</h2>
+        <p>Use your Kabani Google account to add, edit or remove supply and demand listings.</p>
+        <button type="button" class="btn-primary" id="admin-signin-btn">Sign in with Google</button>
+        <p class="admin-error" id="admin-error" role="alert" hidden></p>
+      </section>
+
+      <section class="admin-card" id="admin-denied" hidden>
+        <h2>This account cannot edit listings</h2>
+        <p>Only the Kabani owner account can make changes. Sign out and try again with the right account.</p>
+      </section>
+
+      <div id="admin-app" hidden>
+        <div class="seg" role="tablist" aria-label="Supply or demand">
+          <button type="button" role="tab" id="atab-supply" aria-selected="true">Supply <span id="count-supply">0</span></button>
+          <button type="button" role="tab" id="atab-demand" aria-selected="false" tabindex="-1">Demand <span id="count-demand">0</span></button>
+        </div>
+        <div class="admin-import" id="admin-import" hidden>
+          <p>No live listings yet. Start from the supply list on the map?</p>
+          <button type="button" class="row-go" id="admin-import-btn">Import current listings</button>
+        </div>
+        <form class="admin-form" id="admin-form">
+          <h2 id="admin-form-title">Add a supply listing</h2>
+          <div class="form-row">
+            <div class="form-group"><label for="f-commodity">Commodity</label><select id="f-commodity" required></select></div>
+            <div class="form-group"><label for="f-volume">Volume</label><input id="f-volume" type="text" maxlength="160" placeholder="For example 40 t per month" required /></div>
+          </div>
+          <div class="form-row" id="row-supply">
+            <div class="form-group"><label for="f-origin">Origin</label><input id="f-origin" type="text" maxlength="160" placeholder="Country (leave empty for origin on request)" /></div>
+          </div>
+          <div class="form-row" id="row-demand" hidden>
+            <div class="form-group"><label for="f-when">When</label><input id="f-when" type="text" maxlength="160" placeholder="For example Q1 2027" /></div>
+            <div class="form-group"><label for="f-port">Destination port</label><input id="f-port" type="text" maxlength="160" placeholder="For example Rotterdam" /></div>
+            <div class="form-group"><label for="f-country">Destination country</label><input id="f-country" type="text" maxlength="160" list="country-list" placeholder="Start typing, e.g. Netherlands" /><datalist id="country-list"></datalist></div>
+          </div>
+          <div class="admin-actions">
+            <button type="submit" class="row-go" id="admin-save">Add listing</button>
+            <button type="button" class="panel-showall" id="admin-cancel" hidden>Cancel edit</button>
+          </div>
+          <p class="admin-error" id="admin-form-error" role="alert" hidden></p>
+        </form>
+        <div class="market-card"><table class="market-table admin-table">
+          <thead id="admin-thead"></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table></div>
+        <p class="market-empty" id="admin-empty" hidden>No listings here yet.</p>
+      </div>
+    </div>
+  </main>
+  <script type="application/json" id="admin-data">{"commodities": [{"slug": "coffee", "name": "Coffee"}, {"slug": "tea", "name": "Tea"}, {"slug": "avocado", "name": "Avocado"}, {"slug": "macadamia", "name": "Macadamia"}, {"slug": "flowers", "name": "Flowers"}, {"slug": "poultry", "name": "Poultry"}, {"slug": "urea", "name": "Urea"}, {"slug": "biochar", "name": "Biochar"}, {"slug": "sulphur", "name": "Sulphur"}, {"slug": "oil", "name": "Oil"}, {"slug": "copper", "name": "Copper"}, {"slug": "iron", "name": "Iron"}], "countries": ["Afghanistan", "Albania", "Algeria", "Angola", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bangladesh", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herz.", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Central African Rep.", "Chad", "Chile", "China", "Colombia", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia", "C\u00f4te d'Ivoire", "Dem. Rep. Congo", "Denmark", "Djibouti", "Dominican Rep.", "Ecuador", "Egypt", "El Salvador", "Eq. Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Is.", "Fiji", "Finland", "Fr. S. Antarctic Lands", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Greenland", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Mali", "Mauritania", "Mexico", "Moldova", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "N. Cyprus", "Namibia", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "S. Sudan", "Saudi Arabia", "Senegal", "Serbia", "Sierra Leone", "Slovakia", "Slovenia", "Solomon Is.", "Somalia", "Somaliland", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "W. Sahara", "Yemen", "Zambia", "Zimbabwe", "eSwatini"], "seed": {"supply": [{"commodity": "coffee", "volume": "On request", "origin": "Brazil"}, {"commodity": "coffee", "volume": "On request", "origin": "Burundi"}, {"commodity": "coffee", "volume": "On request", "origin": "Ethiopia"}, {"commodity": "coffee", "volume": "On request", "origin": "India"}, {"commodity": "coffee", "volume": "On request", "origin": "Kenya"}, {"commodity": "coffee", "volume": "On request", "origin": "Nicaragua"}, {"commodity": "coffee", "volume": "On request", "origin": "Rwanda"}, {"commodity": "coffee", "volume": "On request", "origin": "Tanzania"}, {"commodity": "coffee", "volume": "On request", "origin": "Uganda"}, {"commodity": "tea", "volume": "On request", "origin": "Kenya"}, {"commodity": "avocado", "volume": "On request", "origin": "Kenya"}, {"commodity": "avocado", "volume": "On request", "origin": "Tanzania"}, {"commodity": "macadamia", "volume": "On request", "origin": "Kenya"}, {"commodity": "flowers", "volume": "On request", "origin": "Kenya"}, {"commodity": "poultry", "volume": "On request", "origin": "Argentina"}, {"commodity": "poultry", "volume": "On request", "origin": "Brazil"}, {"commodity": "urea", "volume": "On request", "origin": "Argentina"}, {"commodity": "biochar", "volume": "On request", "origin": ""}, {"commodity": "sulphur", "volume": "On request", "origin": ""}, {"commodity": "oil", "volume": "On request", "origin": ""}, {"commodity": "copper", "volume": "On request", "origin": ""}, {"commodity": "iron", "volume": "On request", "origin": ""}], "demand": []}}</script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

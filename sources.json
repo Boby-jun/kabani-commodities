@@ -1,0 +1,79 @@
+{
+ "_help": "Countries: {\"country\": \"<name exactly as on the map>\", \"commodities\": [\"<slug>\", ...]}. \"onRequest\" lists commodities whose origin is shared by contact only (no map pin). Slugs are in commodities.json. After editing run: python3 -I build.py",
+ "countries": [
+  {
+   "country": "Kenya",
+   "commodities": [
+    "coffee",
+    "tea",
+    "avocado",
+    "macadamia",
+    "flowers"
+   ]
+  },
+  {
+   "country": "Tanzania",
+   "commodities": [
+    "coffee",
+    "avocado"
+   ]
+  },
+  {
+   "country": "Uganda",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "Rwanda",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "Burundi",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "Ethiopia",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "India",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "Brazil",
+   "commodities": [
+    "coffee",
+    "poultry"
+   ]
+  },
+  {
+   "country": "Nicaragua",
+   "commodities": [
+    "coffee"
+   ]
+  },
+  {
+   "country": "Argentina",
+   "commodities": [
+    "poultry",
+    "urea"
+   ]
+  }
+ ],
+ "onRequest": [
+  "biochar",
+  "sulphur",
+  "oil",
+  "copper",
+  "iron"
+ ]
+}

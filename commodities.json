@@ -1,0 +1,142 @@
+{
+ "categories": [
+  "Agricultural",
+  "Livestock",
+  "Fertiliser",
+  "Industrial & Energy"
+ ],
+ "items": [
+  {
+   "slug": "coffee",
+   "name": "Coffee",
+   "icon": "<svg viewBox='0 0 24 24' width='1.45em' height='1.45em' aria-hidden='true'><g transform='rotate(38 12 12)'><ellipse cx='12' cy='12' rx='6.6' ry='9.6' fill='#5B3822'/><path d='M12 2.6C8.6 8 15.4 16 12 21.4' fill='none' stroke='#D8B795' stroke-width='1.7' stroke-linecap='round'/></g></svg>",
+   "category": "Agricultural",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "tea",
+   "name": "Tea",
+   "icon": "🍃",
+   "category": "Agricultural",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "avocado",
+   "name": "Avocado",
+   "icon": "🥑",
+   "category": "Agricultural",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "macadamia",
+   "name": "Macadamia",
+   "icon": "🌰",
+   "category": "Agricultural",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "flowers",
+   "name": "Flowers",
+   "icon": "🌸",
+   "category": "Agricultural",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "poultry",
+   "name": "Poultry",
+   "icon": "🐔",
+   "category": "Livestock",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "urea",
+   "name": "Urea",
+   "icon": "🌱",
+   "category": "Fertiliser",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "biochar",
+   "name": "Biochar",
+   "icon": "🪵",
+   "category": "Fertiliser",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "sulphur",
+   "name": "Sulphur",
+   "icon": "🟡",
+   "category": "Industrial & Energy",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "oil",
+   "name": "Oil",
+   "icon": "🛢️",
+   "category": "Industrial & Energy",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "copper",
+   "name": "Copper",
+   "icon": "🔶",
+   "category": "Industrial & Energy",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  },
+  {
+   "slug": "iron",
+   "name": "Iron",
+   "icon": "⚙️",
+   "category": "Industrial & Energy",
+   "summary": "",
+   "producers": [],
+   "specs": [],
+   "seasonality": "",
+   "packaging": ""
+  }
+ ]
+}
