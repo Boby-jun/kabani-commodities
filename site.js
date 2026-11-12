@@ -440,3 +440,16 @@ var MarketFilter = (function () {
     });
   }
 })();
+
+/* Log in: opens a small dialog. Creating an account is not available yet, so it says so. */
+(function loginDialog() {
+  var dlg = document.getElementById('login-dialog');
+  if (!dlg || typeof dlg.showModal !== 'function') return; // without dialog support the links go straight to admin.html
+  var note = document.getElementById('login-note');
+  document.querySelectorAll('a[data-login]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); note.hidden = true; dlg.showModal(); });
+  });
+  document.getElementById('login-create').addEventListener('click', function () { note.hidden = false; });
+  document.getElementById('login-close').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); }); // click on the dimmed backdrop
+})();

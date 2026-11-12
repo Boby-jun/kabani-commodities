@@ -520,6 +520,24 @@
       .market-table thead th { position: static; }
     }
 
+
+    /* ── LOGIN DIALOG ── */
+    .login-dialog {
+      margin: auto; border: 0; border-radius: 24px; padding: 36px 32px 28px; width: min(400px, calc(100vw - 32px)); background: var(--white); color: var(--ink);
+      box-shadow: 0 2px 6px rgba(26,31,33,0.08), 0 30px 70px -20px rgba(26,31,33,0.4);
+    }
+    .login-dialog::backdrop { background: rgba(20,22,22,0.45); backdrop-filter: blur(3px); }
+    .login-dialog h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+    .login-lead { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin-bottom: 22px; }
+    .login-dialog .btn-primary { width: 100%; --drop: var(--tan-pale); }
+    .login-alt { margin-top: 18px; font-size: 14px; color: var(--ink-soft); text-align: center; }
+    .login-note { margin-top: 14px; font-size: 13.5px; line-height: 1.6; color: var(--ink); background: var(--tan-pale); border-radius: 12px; padding: 12px 14px; }
+    .login-note[hidden] { display: none; }
+    .login-note a { color: var(--tan); font-weight: 700; text-underline-offset: 3px; }
+    .login-close { position: absolute; top: 12px; right: 14px; width: 36px; height: 36px; border: 0; background: none; border-radius: 10px; font-size: 26px; line-height: 1; color: var(--ink-soft); cursor: pointer; }
+    .login-close:hover { background: var(--cream-soft); color: var(--ink); }
+    .login-close:focus-visible { outline: 3px solid var(--tan-light); outline-offset: 2px; }
+
     /* ── FOOTER ── */
     footer {
       padding: 36px 60px; background: var(--white);

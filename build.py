@@ -56,7 +56,7 @@ def nav(active=""):
       {a("about.html", "About us", "about")}
     </div>
     <div class="nav-right">
-      <a href="admin.html" class="nav-login">Log in</a>
+      <a href="admin.html" class="nav-login" data-login>Log in</a>
       <a href="contact.html" class="nav-cta">Contact us</a>
     </div>
     <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -68,7 +68,7 @@ def nav(active=""):
     <a href="market.html" onclick="closeMenu()">Commodities</a>
     <a href="index.html#process" onclick="closeMenu()">How it works</a>
     <a href="about.html" onclick="closeMenu()">About us</a>
-    <a href="admin.html" onclick="closeMenu()">Log in</a>
+    <a href="admin.html" data-login onclick="closeMenu()">Log in</a>
     <a href="contact.html" class="mobile-cta" onclick="closeMenu()">Contact us</a>
   </div>
 """
@@ -96,9 +96,17 @@ FOOT = SCALE_CW + f"""
     </div>
     <div class="foot-bottom">
       <p>&copy; 2026 Kabani Commodities, a brand of Kabani Consulting, Geneva, Switzerland. All rights reserved.</p>
-      <a href="admin.html">Admin login</a>
+      <a href="admin.html" data-login>Log in</a>
     </div>
   </footer>
+  <dialog class="login-dialog" id="login-dialog" aria-labelledby="login-title">
+    <button type="button" class="login-close" id="login-close" aria-label="Close">&times;</button>
+    <h2 id="login-title">Log in</h2>
+    <p class="login-lead">Log in to your Kabani account.</p>
+    <a class="btn-primary" href="admin.html">Log in</a>
+    <p class="login-alt">No account yet? <button type="button" class="slicer-link" id="login-create">Create an account</button></p>
+    <p class="login-note" id="login-note" role="status" hidden>This functionality is under construction. Please contact us if you have any questions. <a href="contact.html">Contact us</a></p>
+  </dialog>
   <script src="firebase-config.js"></script>
   <script src="site.js"></script>
 </body>
@@ -474,8 +482,8 @@ def admin():
       </section>
 
       <section class="admin-card" id="admin-denied" hidden>
-        <h2>This account cannot edit listings</h2>
-        <p>Only the Kabani owner account can make changes. Sign out and try again with the right account.</p>
+        <h2>This area is for the Kabani team</h2>
+        <p>Client accounts are under construction. Please <a href="contact.html">contact us</a> if you have any questions, or sign out and try again with a different account.</p>
       </section>
 
       <div id="admin-app" hidden>
