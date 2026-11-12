@@ -402,7 +402,7 @@
     .admin-card h2, .admin-form h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
     .admin-card p { font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); margin-bottom: 18px; }
     .admin-form { max-width: none; margin: 24px 0; display: flex; flex-direction: column; gap: 16px; }
-    .admin-form h2 { margin-bottom: 0; text-transform: capitalize; }
+    .admin-form h2 { margin-bottom: 0; }
     .admin-actions { display: flex; gap: 12px; align-items: center; }
     .admin-import { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--tan-pale); border-radius: 14px; padding: 14px 18px; margin-top: 20px; }
     .admin-import p { font-size: 14px; color: var(--ink); }
@@ -410,6 +410,26 @@
     .admin-del:hover { border-color: #9B2C1F; color: #9B2C1F; }
     .admin-card[hidden], #admin-app[hidden], .admin-user[hidden], .admin-import[hidden], .form-row[hidden], .admin-error[hidden] { display: none; }
     .admin-table .col-go { white-space: nowrap; }
+    .admin-table thead th { position: static; box-shadow: none; }
+    .admin-lead { max-width: 640px; margin-bottom: 28px; }
+    .admin-preview { display: inline-block; font-size: 13.5px; line-height: 1.6; color: var(--ink); background: var(--tan-pale); border: 1px solid var(--tan-light); border-radius: 12px; padding: 10px 16px; margin-bottom: 20px; }
+    .admin-preview[hidden], .admin-notice[hidden], .form-group[hidden] { display: none; }
+    .admin-try { font-size: 13.5px; margin: 18px 0 0; }
+    .admin-form-head p { font-size: 14px; color: var(--ink-soft); margin: 4px 0 0; }
+    .admin-form { gap: 20px; padding: 32px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 16px; }
+    .form-group label em { font-style: normal; font-weight: 600; letter-spacing: 0; text-transform: none; float: right; opacity: 0.8; }
+    .admin-notice { font-size: 14px; font-weight: 600; color: var(--tan); margin: -4px 0 18px; }
+    .admin-notice a { color: inherit; }
+    .admin-table td.cell-name, .market-table td.cell-name { min-width: 200px; max-width: 320px; }
+    .row-note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px; font-size: 13px; line-height: 1.5; font-weight: 500; color: var(--ink-soft); }
+    .admin-table .col-go .panel-showall { margin-left: 4px; }
+    @media (max-width: 720px) {
+      .market-table td.cell-name { display: block; max-width: none; text-align: left; padding-bottom: 8px; }
+      .market-table td.cell-name::before { content: none; }
+      .market-table td.cell-name .row-name { font-size: 16px; }
+      .admin-form { padding: 22px; }
+    }
     @media (max-width: 900px) { .admin-bar { padding: 0 24px; } }
 
 

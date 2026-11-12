@@ -21,7 +21,9 @@ service cloud.firestore {
         && (!('origin' in request.resource.data) || ok(request.resource.data.origin))
         && (!('when' in request.resource.data) || ok(request.resource.data.when))
         && (!('port' in request.resource.data) || ok(request.resource.data.port))
-        && (!('country' in request.resource.data) || ok(request.resource.data.country));
+        && (!('country' in request.resource.data) || ok(request.resource.data.country))
+        && (!('quality' in request.resource.data) || ok(request.resource.data.quality))
+        && (!('details' in request.resource.data) || (request.resource.data.details is string && request.resource.data.details.size() <= 600));
       allow delete: if isOwner();
     }
 

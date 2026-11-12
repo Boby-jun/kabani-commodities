@@ -1,5 +1,5 @@
 {
- "_help": "Supply rows are built automatically from sources.json (one row per country and commodity). Add a volume or note for a supply row under supplyDetails, keyed \"<slug>|<Country>\", e.g. \"coffee|Kenya\": {\"volume\": \"40 t per month\"}. Demand rows are listed below; delete the sample ones and add yours. Fields: commodity (slug), volume, when, port, country (destination country, spelled as on the map, e.g. Netherlands). Set \"sample\": true on example rows. Then run: python3 -I build.py",
+ "_help": "Supply rows are built automatically from sources.json (one row per country and commodity). Add a volume or note for a supply row under supplyDetails, keyed \"<slug>|<Country>\", e.g. \"coffee|Kenya\": {\"volume\": \"40 t per month\"}. Demand rows are listed below; delete the sample ones and add yours. Fields: commodity (slug), volume, quality, when (shipment date), origin (preferred origin country), port, country (destination country, spelled as on the map, e.g. Netherlands), details. Supply rows take quality, when and details under supplyDetails too. Set \"sample\": true on example rows. Then run: python3 -I build.py",
  "updated": "2026-11-10",
  "supplyDetails": {},
  "demand": [
@@ -9,7 +9,9 @@
    "when": "Q1 2027",
    "port": "Rotterdam, Netherlands",
    "sample": true,
-   "country": "Netherlands"
+   "country": "Netherlands",
+   "origin": "Ethiopia",
+   "quality": "Arabica, specialty grade"
   },
   {
    "commodity": "avocado",
@@ -17,7 +19,9 @@
    "when": "January to March",
    "port": "Rotterdam, Netherlands",
    "sample": true,
-   "country": "Netherlands"
+   "country": "Netherlands",
+   "origin": "Tanzania",
+   "quality": "Hass, size 18 to 22"
   },
   {
    "commodity": "urea",
@@ -25,7 +29,8 @@
    "when": "March 2027",
    "port": "Mombasa, Kenya",
    "sample": true,
-   "country": "Kenya"
+   "country": "Kenya",
+   "quality": "46% nitrogen, granular"
   }
  ]
 }

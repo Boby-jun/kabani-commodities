@@ -359,7 +359,7 @@ def slicer_html():
 
 def market():
     order = {c["slug"]: i for i, c in enumerate(ITEMS)}
-    supply = [(r["commodity"], r["volume"], r["origin"] or "Shared on request") for r in supply_rows()]
+    supply = supply_rows()
     demand = MARKET.get("demand", [])
     for r in demand:
         if r["commodity"] not in BY_SLUG:
@@ -369,23 +369,26 @@ def market():
     def link(slug):
         return f'<a class="row-name" href="{slug}.html">{E(BY_SLUG[slug]["name"])}</a>'
 
-    sup_rows = "".join(
-        f'<tr data-commodity="{slug}"><td data-label="Commodity">{link(slug)}</td><td data-label="Volume">{E(vol)}</td>'
-        f'<td data-label="Origin">{E(origin)}</td><td class="col-go">{_go("contact.html?commodity=" + E(BY_SLUG[slug]["name"]) + "&amp;role=Buyer", "Enquire")}</td></tr>'
-        for slug, vol, origin in supply)
-    dem_rows = "".join(
-        f'<tr data-commodity="{r["commodity"]}"><td data-label="Commodity">{link(r["commodity"])}</td><td data-label="Volume">{E(r["volume"])}</td>'
-        f'<td data-label="When">{E(r["when"])}</td><td data-label="Destination port">{E(r["port"])}</td>'
-        f'<td class="col-go">{_go("contact.html?commodity=" + E(BY_SLUG[r["commodity"]]["name"]) + "&amp;role=Supplier", "Offer supply")}</td></tr>'
-        for r in demand)
+    def cells(r, kind):
+        name = f'<td class="cell-name" data-label="Commodity">{link(r["commodity"])}' + (f'<span class="row-note">{E(r["details"])}</span>' if r.get("details") else "") + "</td>"
+        origin = E(r.get("origin") or ("Shared on request" if kind == "supply" else "Any"))
+        out = (name + f'<td data-label="Origin">{origin}</td><td data-label="Volume">{E(r.get("volume") or "On request")}</td>'
+               f'<td data-label="Quality">{E(r.get("quality") or "On request")}</td><td data-label="Shipment">{E(r.get("when") or "Flexible")}</td>')
+        if kind == "demand":
+            out += f'<td data-label="Destination">{E(r.get("port") or r.get("country") or "")}</td>'
+        label, role = ("Enquire", "Buyer") if kind == "supply" else ("Offer supply", "Supplier")
+        return out + f'<td class="col-go">{_go("contact.html?commodity=" + E(BY_SLUG[r["commodity"]]["name"]) + "&amp;role=" + role, label)}</td>'
+
+    sup_rows = "".join(f'<tr data-commodity="{r["commodity"]}">{cells(r, "supply")}</tr>' for r in supply)
+    dem_rows = "".join(f'<tr data-commodity="{r["commodity"]}">{cells(r, "demand")}</tr>' for r in demand)
     updated = MARKET.get("updated", "")
     try:
         import datetime
         updated = datetime.date.fromisoformat(updated).strftime("%-d %B %Y")
     except Exception:
         pass
-    listings = ([{"type": "supply", "commodity": r["commodity"], "volume": r["volume"], "origin": r["origin"]} for r in supply_rows()]
-                + [{"type": "demand", "commodity": r["commodity"], "volume": r["volume"], "when": r["when"], "port": r["port"], "country": r.get("country", ""), "sample": bool(r.get("sample"))} for r in demand])
+    listings = ([{"type": "supply", "commodity": r["commodity"], "volume": r["volume"], "origin": r["origin"], "quality": r["quality"], "when": r["when"]} for r in supply]
+                + [{"type": "demand", "commodity": r["commodity"], "volume": r["volume"], "origin": r.get("origin", ""), "quality": r.get("quality", ""), "when": r.get("when", ""), "port": r.get("port", ""), "country": r.get("country", ""), "sample": bool(r.get("sample"))} for r in demand])
     market_json = json.dumps({"commodities": [{"slug": c["slug"], "name": c["name"], "group": TOPIC_OF[c["slug"]]} for c in ITEMS], "topics": [{"id": i, "name": n, "slugs": s} for i, n, s in TOPICS], "listings": listings})
     sample_note = ('<p class="market-sample">Example demand listings are shown for preview. Replace them in market.json before going live.</p>' if has_sample else "")
     empty = '<p class="market-empty" hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
@@ -405,14 +408,14 @@ def market():
     <div class="section-inner market-body">
       <section class="market-panel" id="panel-supply" data-type="supply" role="tabpanel" aria-labelledby="tab-supply">
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Volume</th><th>Origin</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{sup_rows}</tbody></table></div>
         {empty}
       </section>
       <section class="market-panel" id="panel-demand" data-type="demand" role="tabpanel" aria-labelledby="tab-demand" hidden>
         {sample_note}
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Volume</th><th>When</th><th>Destination port</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Destination</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{dem_rows}</tbody></table></div>
         {empty}
       </section>
@@ -449,15 +452,24 @@ def supply_rows():
     for s in sorted(SOURCES, key=lambda s: s["country"]):
         for slug in s["commodities"]:
             d = MARKET.get("supplyDetails", {}).get(f"{slug}|{s['country']}", {})
-            rows.append({"commodity": slug, "volume": d.get("volume", "On request"), "origin": s["country"]})
+            rows.append({"commodity": slug, "volume": d.get("volume", "On request"), "origin": s["country"],
+                         "quality": d.get("quality", ""), "when": d.get("when", ""), "details": d.get("details", "")})
     for slug in ON_REQUEST:
         d = MARKET.get("supplyDetails", {}).get(f"{slug}|", {})
-        rows.append({"commodity": slug, "volume": d.get("volume", "On request"), "origin": ""})
+        rows.append({"commodity": slug, "volume": d.get("volume", "On request"), "origin": "",
+                     "quality": d.get("quality", ""), "when": d.get("when", ""), "details": d.get("details", "")})
     rows.sort(key=lambda r: (order[r["commodity"]], r["origin"]))
     return rows
 
+QUALITY_HINTS = {
+    "coffee": "For example Arabica AA, screen 17+", "tea": "For example BP1 black tea, CTC", "avocado": "For example Hass, size 18 to 22",
+    "macadamia": "For example kernel style 1, or in shell", "flowers": "For example roses, 50 cm stems, grade A", "poultry": "For example whole frozen chicken, halal",
+    "urea": "For example 46% nitrogen, granular", "biochar": "For example fixed carbon %, particle size", "sulphur": "For example 99.9% purity, granular",
+    "oil": "For example grade, API gravity, sulphur content", "copper": "For example cathode grade A, 99.99%", "iron": "For example ore 62% Fe, fines",
+}
+
 def admin():
-    cm = json.dumps([{"slug": c["slug"], "name": c["name"]} for c in ITEMS])
+    cm = json.dumps([{"slug": c["slug"], "name": c["name"], "hint": QUALITY_HINTS.get(c["slug"], "")} for c in ITEMS])
     countries = json.dumps(sorted(MAPDATA["countries"].keys()))
     seed = json.dumps({"supply": supply_rows(), "demand": [r for r in MARKET.get("demand", []) if not r.get("sample")]})
     return head("Admin — Kabani Commodities", "Listings admin.", '<meta name="robots" content="noindex, nofollow" />') + f"""
@@ -467,7 +479,9 @@ def admin():
   </header>
   <main class="admin-page">
     <div class="section-inner">
+      <p class="admin-preview" id="admin-preview" hidden><strong>Preview mode.</strong> Try the form freely. Nothing here is published and it is forgotten when you close the tab.</p>
       <h1 class="section-title">Listings <span class="accent">admin</span></h1>
+      <p class="section-body admin-lead">Add what you can supply and what buyers are looking for. Each listing appears on the Commodities page and on the map as soon as you save it.</p>
 
       <section class="admin-card" id="admin-setup" hidden>
         <h2>Setup needed</h2>
@@ -479,6 +493,7 @@ def admin():
         <p>Use your Kabani Google account to add, edit or remove supply and demand listings.</p>
         <button type="button" class="btn-primary" id="admin-signin-btn">Sign in with Google</button>
         <p class="admin-error" id="admin-error" role="alert" hidden></p>
+        <p class="admin-try">Just looking? <a href="admin.html?demo=1">Try the form in preview mode</a>.</p>
       </section>
 
       <section class="admin-card" id="admin-denied" hidden>
@@ -495,31 +510,34 @@ def admin():
           <p>No live listings yet. Start from the supply list on the map?</p>
           <button type="button" class="row-go" id="admin-import-btn">Import current listings</button>
         </div>
-        <form class="admin-form" id="admin-form">
-          <h2 id="admin-form-title">Add a supply listing</h2>
-          <div class="form-row">
+        <form class="admin-form" id="admin-form" autocomplete="off">
+          <div class="admin-form-head">
+            <h2 id="admin-form-title">Add a supply listing</h2>
+            <p id="admin-form-sub">Something we can source and offer to buyers.</p>
+          </div>
+          <div class="form-grid">
             <div class="form-group"><label for="f-commodity">Commodity</label><select id="f-commodity" required></select></div>
-            <div class="form-group"><label for="f-volume">Volume</label><input id="f-volume" type="text" maxlength="160" placeholder="For example 40 t per month" required /></div>
+            <div class="form-group"><label for="f-origin" id="l-origin">Country of origin</label><input id="f-origin" type="text" maxlength="160" list="country-list" placeholder="Start typing, e.g. Kenya" /></div>
+            <div class="form-group"><label for="f-volume">Volume</label><input id="f-volume" type="text" maxlength="160" placeholder="For example 40 t per month, or 2 containers" required /></div>
+            <div class="form-group"><label for="f-quality">Quality / grade</label><input id="f-quality" type="text" maxlength="160" placeholder="" /></div>
+            <div class="form-group"><label for="f-when" id="l-when">Date of export / shipment</label><input id="f-when" type="text" maxlength="160" list="when-list" placeholder="Pick a suggestion or type, e.g. March 2027" /><datalist id="when-list"></datalist></div>
+            <div class="form-group" data-demand><label for="f-port">Destination port</label><input id="f-port" type="text" maxlength="160" placeholder="For example Rotterdam" /></div>
+            <div class="form-group" data-demand><label for="f-country">Destination country</label><input id="f-country" type="text" maxlength="160" list="country-list" placeholder="Start typing, e.g. Netherlands" /></div>
           </div>
-          <div class="form-row" id="row-supply">
-            <div class="form-group"><label for="f-origin">Origin</label><input id="f-origin" type="text" maxlength="160" placeholder="Country (leave empty for origin on request)" /></div>
-          </div>
-          <div class="form-row" id="row-demand" hidden>
-            <div class="form-group"><label for="f-when">When</label><input id="f-when" type="text" maxlength="160" placeholder="For example Q1 2027" /></div>
-            <div class="form-group"><label for="f-port">Destination port</label><input id="f-port" type="text" maxlength="160" placeholder="For example Rotterdam" /></div>
-            <div class="form-group"><label for="f-country">Destination country</label><input id="f-country" type="text" maxlength="160" list="country-list" placeholder="Start typing, e.g. Netherlands" /><datalist id="country-list"></datalist></div>
-          </div>
+          <datalist id="country-list"></datalist>
+          <div class="form-group"><label for="f-details">More details <em id="details-count">0 / 600</em></label><textarea id="f-details" maxlength="600" rows="3" placeholder="Packaging, certifications, payment terms, samples, anything a buyer or supplier should know."></textarea></div>
           <div class="admin-actions">
-            <button type="submit" class="row-go" id="admin-save">Add listing</button>
-            <button type="button" class="panel-showall" id="admin-cancel" hidden>Cancel edit</button>
+            <button type="submit" class="row-go row-go-solid" id="admin-save">Add listing</button>
+            <button type="button" class="panel-showall" id="admin-cancel" hidden>Cancel</button>
           </div>
           <p class="admin-error" id="admin-form-error" role="alert" hidden></p>
         </form>
+        <p class="admin-notice" id="admin-notice" role="status" hidden></p>
         <div class="market-card"><table class="market-table admin-table">
           <thead id="admin-thead"></thead>
           <tbody id="admin-tbody"></tbody>
         </table></div>
-        <p class="market-empty" id="admin-empty" hidden>No listings here yet.</p>
+        <p class="market-empty" id="admin-empty" hidden>No listings here yet. Add the first one above.</p>
       </div>
     </div>
   </main>

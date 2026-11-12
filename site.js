@@ -359,7 +359,7 @@ var MarketFilter = (function () {
       var li = el('li', 'mm-item');
       li.appendChild(el('span', 'mm-badge ' + (l.type === 'supply' ? 'is-sup' : 'is-dem'), l.type === 'supply' ? 'Supply' : 'Demand'));
       var a = el('a', 'row-name', byslug[l.commodity]); a.href = l.commodity + '.html'; li.appendChild(a);
-      li.appendChild(el('span', 'mm-meta', [l.volume || 'On request'].concat(l.type === 'demand' ? [l.when, l.port].filter(Boolean) : []).join(' · ')));
+      li.appendChild(el('span', 'mm-meta', [l.volume || 'On request', l.quality, l.when].concat(l.type === 'demand' ? [l.port] : []).filter(Boolean).join(' · ')));
       var go = el('a', 'row-go', l.type === 'supply' ? 'Enquire' : 'Offer supply');
       go.href = 'contact.html?commodity=' + encodeURIComponent(byslug[l.commodity]) + '&role=' + (l.type === 'supply' ? 'Buyer' : 'Supplier');
       li.appendChild(go); ul.appendChild(li);
@@ -405,7 +405,8 @@ var MarketFilter = (function () {
   }).then(function (res) {
     var docs = (res[1].documents || []).map(function (d) {
       return { type: str(d.fields, 'type'), commodity: str(d.fields, 'commodity'), volume: str(d.fields, 'volume'),
-               origin: str(d.fields, 'origin'), when: str(d.fields, 'when'), port: str(d.fields, 'port'), country: str(d.fields, 'country') };
+               origin: str(d.fields, 'origin'), when: str(d.fields, 'when'), port: str(d.fields, 'port'), country: str(d.fields, 'country'),
+               quality: str(d.fields, 'quality'), details: str(d.fields, 'details') };
     }).filter(function (d) { return byslug[d.commodity] && (d.type === 'supply' || d.type === 'demand'); });
     docs.sort(function (a, b) { return order[a.commodity] - order[b.commodity] || a.origin.localeCompare(b.origin); });
     render('supply', docs.filter(function (d) { return d.type === 'supply'; }));
@@ -428,10 +429,14 @@ var MarketFilter = (function () {
     rows.forEach(function (r) {
       var tr = document.createElement('tr'); tr.setAttribute('data-commodity', r.commodity);
       var a = document.createElement('a'); a.className = 'row-name'; a.href = r.commodity + '.html'; a.textContent = byslug[r.commodity];
-      tr.appendChild(td('Commodity', a));
+      var nameCell = td('Commodity', a); nameCell.className = 'cell-name';
+      if (r.details) { var note = document.createElement('span'); note.className = 'row-note'; note.textContent = r.details; nameCell.appendChild(note); }
+      tr.appendChild(nameCell);
+      tr.appendChild(td('Origin', r.origin || (type === 'supply' ? 'Shared on request' : 'Any')));
       tr.appendChild(td('Volume', r.volume || 'On request'));
-      if (type === 'supply') tr.appendChild(td('Origin', r.origin || 'Shared on request'));
-      else { tr.appendChild(td('When', r.when)); tr.appendChild(td('Destination port', r.port)); }
+      tr.appendChild(td('Quality', r.quality || 'On request'));
+      tr.appendChild(td('Shipment', r.when || 'Flexible'));
+      if (type === 'demand') tr.appendChild(td('Destination', r.port || r.country || ''));
       var go = document.createElement('td'); go.className = 'col-go';
       var l = document.createElement('a'); l.className = 'row-go';
       l.href = 'contact.html?commodity=' + encodeURIComponent(byslug[r.commodity]) + '&role=' + (type === 'supply' ? 'Buyer' : 'Supplier');
