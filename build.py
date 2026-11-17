@@ -48,7 +48,7 @@ def nav(active=""):
         return f'<a href="{href}"{cls}>{label}</a>'
     return f"""
   <nav>
-    <a class="nav-logo" href="index.html"><svg class="nav-mark" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#F4F3EE"/><g fill="none" stroke="#1F4D3A" stroke-width="6.4" stroke-linecap="butt"><path d="M23.68 16V48"/><path d="M26.2 34.3 42.9 17.1"/><path d="M28.5 31.6 43.8 47.1"/></g></svg><b>Kabani <span>Commodities</span></b></a>
+    <a class="nav-logo" href="index.html" aria-label="Kabani Commodities, home"><svg viewBox="0 0 240 64" class="nav-lockup" aria-hidden="true"><circle cx="32" cy="32" r="29.6" fill="none" stroke="#F4F3EE" stroke-width="3.6"/><g fill="none" stroke="#F4F3EE" stroke-width="6.00" stroke-linecap="butt" stroke-linejoin="miter"><path d="M24.20 17.00L24.20 47.00"/><path d="M25.40 33.20L42.20 17.90"/><path d="M27.50 31.10L43.10 46.10"/></g><text x="82" y="31" font-family="Montserrat, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="3.6" fill="#F4F3EE">KABANI</text><text x="82" y="51" font-family="Montserrat, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" letter-spacing="5.2" fill="#C9A75E">COMMODITIES</text></svg></a>
     <div class="nav-links">
       {a("index.html", "Home", "home")}
       {a("market.html", "Commodities", "market")}
