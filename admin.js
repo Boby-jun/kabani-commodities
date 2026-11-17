@@ -22,6 +22,7 @@ for (const n of data.countries) { const o = document.createElement('option'); o.
 })();
 
 let store = null, listings = [], tab = 'supply', editing = null;
+const picked = new Set(); // commodity slicer: nothing ticked shows everything
 
 /* ---------- data layers ---------- */
 const SAMPLE = [
@@ -98,7 +99,8 @@ async function load() {
 function render() {
   for (const t of ['supply', 'demand']) $('count-' + t).textContent = listings.filter((l) => l.type === t).length;
   const isDemand = tab === 'demand';
-  const rows = listings.filter((l) => l.type === tab).sort((a, b) => (order[a.commodity] ?? 99) - (order[b.commodity] ?? 99) || (a.origin || '').localeCompare(b.origin || ''));
+  const all = listings.filter((l) => l.type === tab);
+  const rows = all.filter((l) => !picked.size || picked.has(l.commodity)).sort((a, b) => (order[a.commodity] ?? 99) - (order[b.commodity] ?? 99) || (a.origin || '').localeCompare(b.origin || ''));
   $('admin-thead').innerHTML = '<tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th>' + (isDemand ? '<th>Destination</th>' : '') + '<th><span class="sr-only">Actions</span></th></tr>';
   const tbody = $('admin-tbody'); tbody.textContent = '';
   for (const l of rows) {
@@ -112,7 +114,16 @@ function render() {
     actions.append(button('Edit', 'panel-showall', () => fill(l, true)), ' ', button('Duplicate', 'panel-showall', () => fill(l, false)), ' ', button('Delete', 'panel-showall admin-del', () => remove(l)));
     tr.append(actions); tbody.append(tr);
   }
-  $('admin-empty').hidden = rows.length > 0;
+  const empty = $('admin-empty');
+  empty.hidden = rows.length > 0; empty.textContent = '';
+  $('admin-list-title').textContent = (isDemand ? 'Demand' : 'Supply') + ' listings' + (picked.size ? ' (' + rows.length + ' of ' + all.length + ')' : '');
+  document.querySelector('.admin-table').closest('.market-card').hidden = rows.length === 0;
+  if (!rows.length) {
+    if (picked.size && all.length) {
+      empty.append('Nothing matches this selection. ');
+      empty.append(button('Show all commodities', 'slicer-link', () => setPicked([])));
+    } else empty.append('No ' + tab + ' listings yet. Add the first one above.');
+  }
   $('admin-form-title').textContent = (editing ? 'Edit this ' : 'Add a ') + tab + ' listing';
   $('admin-form-sub').textContent = isDemand ? 'Something a buyer is looking for. Suppliers can offer against it.' : 'Something we can source and offer to buyers.';
   $('admin-save').textContent = editing ? 'Save changes' : 'Add listing';
@@ -205,3 +216,32 @@ $('admin-import-btn').addEventListener('click', async () => {
     show('admin-signin'); $('admin-error').textContent = 'Could not reach the sign-in service (' + (err.message || err) + ').'; $('admin-error').hidden = false;
   }
 })();
+
+/* ---------- commodity slicer (same control as the public Commodities page) ---------- */
+(function slicer() {
+  const btn = $('slicer-btn'), panel = $('slicer-panel'), clearBtn = $('slicer-clear'), label = btn.querySelector('.slicer-label');
+  const boxes = [...panel.querySelectorAll('input[type="checkbox"][value]')], topicBoxes = [...panel.querySelectorAll('input[data-topic]')];
+  const setOpen = (o) => { panel.hidden = !o; btn.setAttribute('aria-expanded', String(o)); };
+  btn.addEventListener('click', () => setOpen(panel.hidden));
+  document.addEventListener('click', (e) => { if (!panel.hidden && !e.target.closest('.slicer')) setOpen(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
+  const fromBoxes = () => setPicked(boxes.filter((b) => b.checked).map((b) => b.value));
+  boxes.forEach((b) => b.addEventListener('change', fromBoxes));
+  topicBoxes.forEach((tb) => tb.addEventListener('change', () => {
+    const t = data.topics.find((x) => x.id === tb.dataset.topic);
+    boxes.forEach((b) => { if (t.slugs.includes(b.value)) b.checked = tb.checked; });
+    fromBoxes();
+  }));
+  clearBtn.addEventListener('click', () => setPicked([]));
+  window.__syncSlicer = () => {
+    boxes.forEach((b) => { b.checked = picked.has(b.value); });
+    for (const tb of topicBoxes) {
+      const t = data.topics.find((x) => x.id === tb.dataset.topic), n = t.slugs.filter((s) => picked.has(s)).length;
+      tb.checked = n === t.slugs.length; tb.indeterminate = n > 0 && n < t.slugs.length;
+    }
+    const a = [...picked];
+    label.textContent = !a.length ? 'All commodities' : a.length === 1 ? names[a[0]] : a.length + ' commodities';
+    btn.classList.toggle('is-filtered', a.length > 0); clearBtn.hidden = !a.length;
+  };
+})();
+function setPicked(slugs) { picked.clear(); slugs.forEach((s) => picked.add(s)); window.__syncSlicer(); render(); }

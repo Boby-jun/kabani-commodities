@@ -472,6 +472,7 @@ def admin():
     cm = json.dumps([{"slug": c["slug"], "name": c["name"], "hint": QUALITY_HINTS.get(c["slug"], "")} for c in ITEMS])
     countries = json.dumps(sorted(MAPDATA["countries"].keys()))
     seed = json.dumps({"supply": supply_rows(), "demand": [r for r in MARKET.get("demand", []) if not r.get("sample")]})
+    topics = json.dumps([{"id": i, "name": n, "slugs": sl} for i, n, sl in TOPICS])
     return head("Admin — Kabani Commodities", "Listings admin.", '<meta name="robots" content="noindex, nofollow" />') + f"""
   <header class="admin-bar">
     <a class="nav-logo" href="index.html">Kabani <span>Commodities</span></a>
@@ -533,15 +534,19 @@ def admin():
           <p class="admin-error" id="admin-form-error" role="alert" hidden></p>
         </form>
         <p class="admin-notice" id="admin-notice" role="status" hidden></p>
+        <div class="admin-list-bar">
+          <h2 id="admin-list-title">Supply listings</h2>
+          <div class="market-tools">{slicer_html()}<button type="button" class="slicer-clear" id="slicer-clear" hidden>Clear</button></div>
+        </div>
         <div class="market-card"><table class="market-table admin-table">
           <thead id="admin-thead"></thead>
           <tbody id="admin-tbody"></tbody>
         </table></div>
-        <p class="market-empty" id="admin-empty" hidden>No listings here yet. Add the first one above.</p>
+        <p class="market-empty" id="admin-empty" hidden></p>
       </div>
     </div>
   </main>
-  <script type="application/json" id="admin-data">{{"commodities": {cm}, "countries": {countries}, "seed": {seed}}}</script>
+  <script type="application/json" id="admin-data">{{"commodities": {cm}, "countries": {countries}, "seed": {seed}, "topics": {topics}}}</script>
   <script src="firebase-config.js"></script>
   <script type="module" src="admin.js"></script>
 </body>
