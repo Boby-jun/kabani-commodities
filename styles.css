@@ -733,4 +733,18 @@
       .process-grid { grid-template-columns: 1fr; }
       .commodity-grid { grid-template-columns: repeat(2, 1fr); }
     }
-  
+
+    /* ── NAV: bottle-green bar, reversed logo (cream Kabani, brass Commodities: 8.7:1 and 4.2:1 on the green) ── */
+    nav { background: var(--tan); border-bottom: 0; backdrop-filter: none; }
+    .nav-logo { display: inline-flex; align-items: center; gap: 12px; color: var(--cream-soft); }
+    .nav-logo b { font-weight: 800; }
+    .nav-logo span { color: var(--tan-light); }
+    .nav-mark { width: 40px; height: 40px; flex: none; }
+    .nav-links a, .nav-login { color: rgba(244,243,238,0.86); }
+    .nav-links a:hover, .nav-links a.active, .nav-login:hover { color: #FFFFFF; }
+    .nav-login.is-admin { background: transparent; color: var(--cream-soft); border-color: rgba(244,243,238,0.5); }
+    .nav-login.is-admin:hover { color: #FFFFFF; border-color: #FFFFFF; }
+    nav .nav-cta { --face: var(--cream-soft); --face-hi: #FFFFFF; --edge: var(--cream-soft); --drop: rgba(0,0,0,0.32); color: var(--tan); }
+    nav .nav-cta:hover { color: var(--tan); }
+    .hamburger span { background: var(--cream-soft); }
+    nav .nav-login:focus-visible, nav .nav-links a:focus-visible { outline-color: var(--tan-light); }
