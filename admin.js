@@ -33,6 +33,27 @@ const SAMPLE = [
   { type: 'demand', commodity: 'urea', origin: '', volume: '5,000 t', quality: '46% nitrogen, granular', when: 'March 2027', port: 'Mombasa', country: 'Kenya', details: 'Bagged in 50 kg, or bulk. Origin open.' },
 ];
 
+/* ---------- sign-in lifetime: signed out after 30 minutes without activity ----------
+   'kabani-admin-seen' holds the time of the last activity. site.js keeps it fresh while the owner
+   browses the public pages and reads the same key, so the clock is shared across the whole site. */
+const IDLE_MS = 30 * 60 * 1000;
+let signOutNow = () => {};
+const seenAt = () => { try { return Number(localStorage.getItem('kabani-admin-seen')) || 0; } catch (e) { return 0; } };
+const touch = () => { try { localStorage.setItem('kabani-admin-seen', String(Date.now())); } catch (e) { /* storage blocked */ } };
+const idleExpired = () => { const t = seenAt(); return t > 0 && Date.now() - t > IDLE_MS; };
+const expire = () => {
+  try { localStorage.removeItem('kabani-admin'); localStorage.removeItem('kabani-admin-seen'); } catch (e) { /* storage blocked */ }
+  $('admin-timeout').hidden = false; // shown on the sign-in card once the sign-out lands
+  return signOutNow();
+};
+(function watchActivity() {
+  let last = 0;
+  const bump = () => { const n = Date.now(); if (n - last < 20000) return; last = n; if (!idleExpired()) touch(); };
+  ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((ev) => window.addEventListener(ev, bump, { passive: true, capture: true }));
+  setInterval(() => { if (!demo && store && store.live && idleExpired()) expire(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !demo && store && store.live && idleExpired()) expire(); });
+})();
+
 function demoStore() {
   let seq = 0, rows = [];
   try { rows = JSON.parse(sessionStorage.getItem('kabani-demo') || 'null') || []; } catch (e) { /* storage blocked */ }
@@ -54,12 +75,14 @@ async function firebaseStore(onUser) {
   const app = initializeApp({ apiKey: cfg.apiKey, authDomain: cfg.authDomain, projectId: cfg.projectId, appId: cfg.appId });
   const auth = A.getAuth(app), db = F.getFirestore(app);
   $('admin-signin-btn').addEventListener('click', async () => {
+    touch(); $('admin-timeout').hidden = true; // a fresh sign-in starts a fresh 30 minutes
     const provider = new A.GoogleAuthProvider();
     provider.setCustomParameters({ login_hint: cfg.ownerEmail, hd: cfg.ownerEmail.split('@')[1] });
     try { $('admin-error').hidden = true; await A.signInWithPopup(auth, provider); }
     catch (e) { $('admin-error').textContent = 'Sign-in did not complete (' + (e.code || e.message) + ').'; $('admin-error').hidden = false; }
   });
   $('admin-signout').addEventListener('click', () => A.signOut(auth));
+  signOutNow = () => A.signOut(auth);
   const markLive = () => { sessionStorage.setItem('kabani-live', '1'); return F.setDoc(F.doc(db, 'meta', 'live'), { updatedAt: F.serverTimestamp() }, { merge: true }); };
   const api = {
     live: true,
@@ -211,6 +234,8 @@ $('admin-import-btn').addEventListener('click', async () => {
       $('admin-email').textContent = user.email;
       const owner = user.email && user.email.toLowerCase() === cfg.ownerEmail.toLowerCase() && user.emailVerified;
       if (!owner) { remember(false); show('admin-denied'); return; }
+      if (idleExpired()) { await expire(); return; } // came back after 30+ minutes: the saved sign-in is no longer valid
+      if (!seenAt()) touch();
       remember(true); show('admin-app'); await load();
     });
   } catch (err) {

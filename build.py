@@ -492,6 +492,7 @@ def admin():
       <section class="admin-card" id="admin-signin" hidden>
         <h2>Sign in</h2>
         <p>Use your Kabani Google account to add, edit or remove supply and demand listings.</p>
+        <p class="admin-timeout" id="admin-timeout" role="status" hidden>You were signed out after 30 minutes of inactivity. Sign in again to continue.</p>
         <button type="button" class="btn-primary" id="admin-signin-btn">Sign in with Google</button>
         <p class="admin-error" id="admin-error" role="alert" hidden></p>
         <p class="admin-try">Just looking? <a href="admin.html?demo=1">Try the form in preview mode</a>.</p>

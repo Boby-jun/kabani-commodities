@@ -523,8 +523,19 @@ var MarketFilter = (function () {
 
 /* Log in: opens a small dialog. Creating an account is not available yet, so it says so. */
 (function loginDialog() {
-  var admin = false;
-  try { admin = localStorage.getItem('kabani-admin') === '1'; } catch (e) { /* storage blocked */ }
+  var admin = false, IDLE_MS = 30 * 60 * 1000;
+  try {
+    admin = localStorage.getItem('kabani-admin') === '1';
+    var seen = Number(localStorage.getItem('kabani-admin-seen')) || 0;
+    if (admin && seen && Date.now() - seen > IDLE_MS) { // idle for 30+ minutes: back to "Log in"; admin.js ends the saved session
+      admin = false; localStorage.removeItem('kabani-admin');
+    } else if (admin) {
+      var last = 0; // browsing the public pages counts as activity, so the 30 minutes restart
+      var bump = function () { var n = Date.now(); if (n - last < 20000) return; last = n; try { localStorage.setItem('kabani-admin-seen', String(n)); } catch (e) { /* ignore */ } };
+      ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, bump, { passive: true, capture: true }); });
+      bump();
+    }
+  } catch (e) { /* storage blocked */ }
   if (admin) { // signed in as the owner before: the link goes straight to the admin page
     document.querySelectorAll('a[data-login]').forEach(function (a) { a.textContent = 'Admin'; a.href = 'admin.html'; a.classList.add('is-admin'); a.removeAttribute('data-login'); });
   }
