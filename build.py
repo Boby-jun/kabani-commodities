@@ -155,7 +155,7 @@ def sourcing_map():
     <div class="section-inner">
       <h2 class="section-title">Where we <span class="accent">source</span></h2>
       <p class="section-body">Select a highlighted country to see what we can source there.</p>
-      <div class="section-actions"><a class="row-go row-go-solid" href="market.html#map">View supply &amp; demand</a><a class="row-go" href="market.html">View commodities</a></div>
+      <div class="section-actions"><a class="row-go row-go-solid" href="market.html">View commodities</a><a class="row-go" href="market.html#map">Open the full map</a></div>
       <div class="map-layout">
         <div class="map-stage" id="map-stage" tabindex="0" aria-label="Interactive world map. Use plus and minus to zoom, arrow keys to move.">
           <svg id="world-map" viewBox="{-PAD:g} {VBY:.2f} {VBW:g} {VBH:.2f}" data-w="{W:g}" data-h="{H:g}" data-pad="{PAD:g}" preserveAspectRatio="xMidYMid meet" aria-hidden="false" focusable="false">
@@ -363,10 +363,12 @@ def slicer_html():
             f'<div class="slicer-panel" id="slicer-panel" role="group" aria-label="Choose commodities" hidden>'
             f'<p class="slicer-hint">Tick the commodities to show. Nothing ticked shows all.</p>{groups}</div></div>')
 
+BUILTIN_LISTINGS = False  # True shows the placeholder supply rows and sample demand again; real listings come from the admin page
+
 def market():
     order = {c["slug"]: i for i, c in enumerate(ITEMS)}
-    supply = supply_rows()
-    demand = MARKET.get("demand", [])
+    supply = supply_rows() if BUILTIN_LISTINGS else []
+    demand = MARKET.get("demand", []) if BUILTIN_LISTINGS else []
     for r in demand:
         if r["commodity"] not in BY_SLUG:
             raise SystemExit(f"market.json: unknown commodity slug '{r['commodity']}'.")
@@ -405,7 +407,7 @@ def market():
                 + [{"type": "demand", "commodity": r["commodity"], "volume": r["volume"], "origin": r.get("origin", ""), "quality": r.get("quality", ""), "when": r.get("when", ""), "port": r.get("port", ""), "country": r.get("country", ""), "sample": bool(r.get("sample"))} for r in demand])
     market_json = json.dumps({"commodities": [{"slug": c["slug"], "name": c["name"], "group": TOPIC_OF[c["slug"]]} for c in ITEMS], "topics": [{"id": i, "name": n, "slugs": s} for i, n, s in TOPICS], "listings": listings})
     sample_note = ('<p class="market-sample">Example demand listings are shown for preview. Replace them in market.json before going live.</p>' if has_sample else "")
-    empty = '<p class="market-empty" hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
+    empty = '<p class="market-empty" data-none="Nothing is listed here yet. <a href=&quot;contact.html&quot;>Tell us what you need</a> and we will look for the match." hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
     return head("Commodities — Supply & Demand — Kabani Commodities", "Current supply and demand across the commodities Kabani Commodities brokers.") + nav("market") + f"""
   <main class="market-page" id="market-page">
     <div class="market-bar">
@@ -422,14 +424,14 @@ def market():
     <div class="section-inner market-body">
       <section class="market-panel" id="panel-supply" data-type="supply" role="tabpanel" aria-labelledby="tab-supply">
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th data-dim="commodity">Commodity</th><th data-dim="origin">Origin</th><th data-dim="volume">Volume</th><th data-dim="quality">Quality</th><th data-dim="when">Shipment</th><th data-dim="added">Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{sup_rows}</tbody></table></div>
         {empty}
       </section>
       <section class="market-panel" id="panel-demand" data-type="demand" role="tabpanel" aria-labelledby="tab-demand" hidden>
         {sample_note}
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Destination</th><th>Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th data-dim="commodity">Commodity</th><th data-dim="origin">Origin</th><th data-dim="volume">Volume</th><th data-dim="quality">Quality</th><th data-dim="when">Shipment</th><th>Destination</th><th data-dim="added">Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{dem_rows}</tbody></table></div>
         {empty}
       </section>
@@ -485,7 +487,7 @@ QUALITY_HINTS = {
 def admin():
     cm = json.dumps([{"slug": c["slug"], "name": c["name"], "hint": QUALITY_HINTS.get(c["slug"], "")} for c in ITEMS])
     countries = json.dumps(sorted(MAPDATA["countries"].keys()))
-    seed = json.dumps({"supply": supply_rows(), "demand": [r for r in MARKET.get("demand", []) if not r.get("sample")]})
+    seed = json.dumps({"supply": supply_rows(), "demand": [r for r in MARKET.get("demand", []) if not r.get("sample")]} if BUILTIN_LISTINGS else {"supply": [], "demand": []})
     topics = json.dumps([{"id": i, "name": n, "slugs": sl} for i, n, sl in TOPICS])
     return head("Admin — Kabani Commodities", "Listings admin.", '<meta name="robots" content="noindex, nofollow" />') + f"""
   <header class="admin-bar">
@@ -558,6 +560,7 @@ def admin():
           <tbody id="admin-tbody"></tbody>
         </table></div>
         <p class="market-empty" id="admin-empty" hidden></p>
+        <p class="admin-wipe" id="admin-wipe-row" hidden><button type="button" class="panel-showall admin-del" id="admin-wipe">Delete all listings</button> <span>Removes every supply and demand listing at once. This cannot be undone.</span></p>
       </div>
     </div>
   </main>

@@ -196,12 +196,17 @@ var MarketStore = (function () {
 })();
 
 /* The commodity slicer's selection, shared by both lists and the map. Nothing selected means everything. */
+function fmtAdded(v) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+  return m ? (+m[3]) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[2] - 1] + ' ' + m[1] : '\u2014';
+}
 var MarketFilter = (function () {
-  var sel = {}, subs = [], dims = { origin: {}, volume: {}, quality: {}, when: {} };
+  var sel = {}, subs = [], dims = { origin: {}, volume: {}, quality: {}, when: {}, added: {} };
   // what a listing shows in each column, with the same fallbacks the tables use
   function val(l, d) {
     if (d === 'origin') return l.origin || (l.type === 'supply' ? 'Shared on request' : 'Any');
     if (d === 'when') return l.when || 'Flexible';
+    if (d === 'added') return fmtAdded(l.added);
     return l[d] || 'On request';
   }
   function fire() { subs.forEach(function (f) { f(); }); }
@@ -213,7 +218,7 @@ var MarketFilter = (function () {
     dim: function (d) { return Object.keys(dims[d]); },
     setDim: function (d, vals) { dims[d] = {}; vals.forEach(function (x) { dims[d][x] = true; }); fire(); },
     val: val,
-    match: function (l) { return this.has(l.commodity) && dimOk({ origin: val(l, 'origin'), volume: val(l, 'volume'), quality: val(l, 'quality'), when: val(l, 'when') }); },
+    match: function (l) { return this.has(l.commodity) && dimOk({ origin: val(l, 'origin'), volume: val(l, 'volume'), quality: val(l, 'quality'), when: val(l, 'when'), added: val(l, 'added') }); },
     matchRow: function (slug, v) { return this.has(slug) && dimOk(v); },
     active: function () { return Object.keys(sel).length > 0 || Object.keys(dims).some(function (d) { return Object.keys(dims[d]).length > 0; }); },
     clear: function () { sel = {}; Object.keys(dims).forEach(function (d) { dims[d] = {}; }); fire(); },
@@ -224,7 +229,8 @@ var MarketFilter = (function () {
 (function marketPage() {
   var tabs = document.querySelectorAll('.seg [role="tab"]'), dataEl = document.getElementById('market-data');
   if (!tabs.length || !dataEl) return;
-  var mdata = JSON.parse(dataEl.textContent), byslug = {}, topics = mdata.topics || [];
+  var mdata = JSON.parse(dataEl.textContent), byslug = {}, topics = mdata.topics || [], currentTab = 'supply';
+  window.__currentTab = function () { return currentTab; };
   mdata.commodities.forEach(function (c) { byslug[c.slug] = c.name; });
   MarketStore.set(mdata.listings || []);
 
@@ -236,6 +242,7 @@ var MarketFilter = (function () {
       document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
     });
     if (history.replaceState) history.replaceState(null, '', location.pathname + location.search + '#' + which);
+    currentTab = which; if (window.__placeSlicers) window.__placeSlicers();
   }
   tabs.forEach(function (t, i) {
     t.addEventListener('click', function () { show(t.id.replace('tab-', '')); });
@@ -283,11 +290,17 @@ var MarketFilter = (function () {
       var visible = 0;
       p.querySelectorAll('tbody tr').forEach(function (r) {
         var cell = function (label) { var c = r.querySelector('td[data-label="' + label + '"]'); return c ? c.textContent.trim() : ''; };
-        var off = !MarketFilter.matchRow(r.getAttribute('data-commodity'), { origin: cell('Origin'), volume: cell('Volume'), quality: cell('Quality'), when: cell('Shipment') });
+        var off = !MarketFilter.matchRow(r.getAttribute('data-commodity'), { origin: cell('Origin'), volume: cell('Volume'), quality: cell('Quality'), when: cell('Shipment'), added: cell('Date added') });
         r.classList.toggle('is-filtered', off); if (!off) visible++;
       });
-      var empty = p.querySelector('.market-empty'); if (empty) empty.hidden = visible > 0;
-      p.querySelector('.market-card').classList.toggle('is-empty', visible === 0);
+      var empty = p.querySelector('.market-empty');
+      if (empty) {
+        if (!empty.hasAttribute('data-some')) empty.setAttribute('data-some', empty.innerHTML);
+        empty.innerHTML = p.querySelectorAll('tbody tr').length ? empty.getAttribute('data-some') : empty.getAttribute('data-none');
+        empty.hidden = visible > 0;
+        [].forEach.call(empty.querySelectorAll('[data-clear]'), function (b) { b.addEventListener('click', function () { MarketFilter.clear(); }); });
+      }
+      p.querySelector('.market-card').classList.toggle('is-empty', p.querySelectorAll('tbody tr').length === 0); // keep the headings (and their slicers) while a selection shows nothing
       var count = document.querySelector('#tab-' + p.getAttribute('data-type') + ' span'); if (count) count.textContent = visible;
     });
   }
@@ -317,7 +330,7 @@ var MarketFilter = (function () {
 (function columnSlicers() {
   var tools = document.querySelector('.market-tools'), clearBtn = document.getElementById('slicer-clear'), first = document.getElementById('slicer-btn');
   if (!tools || !clearBtn || !first) return;
-  var DIMS = [['origin', 'Origin'], ['volume', 'Volume'], ['quality', 'Quality'], ['when', 'Shipment']], parts = {};
+  var DIMS = [['origin', 'Origin'], ['volume', 'Volume'], ['quality', 'Quality'], ['when', 'Shipment'], ['added', 'Date added']], parts = {};
   var chevron = first.querySelector('svg').outerHTML;
 
   function closeAll(except) {
@@ -370,6 +383,27 @@ var MarketFilter = (function () {
   }
   MarketStore.on(build);
   MarketFilter.on(paint);
+
+  /* Where the slicers live: inside the column headings of the visible table; in the bar above the map, and on phones (no headings). */
+  var mq = window.matchMedia('(max-width: 720px)');
+  window.__placeSlicers = function () {
+    var tab = window.__currentTab ? window.__currentTab() : 'supply';
+    var panelEl = document.getElementById('panel-' + tab);
+    var inHeads = tab !== 'map' && !mq.matches && panelEl;
+    var wraps = { commodity: first.closest('.slicer') };
+    DIMS.forEach(function (d) { wraps[d[0]] = parts[d[0]].wrap; });
+    Object.keys(wraps).forEach(function (k) {
+      var th = inHeads ? panelEl.querySelector('thead th[data-dim="' + k + '"]') : null;
+      if (th) { th.textContent = ''; th.appendChild(wraps[k]); th.classList.add('has-slicer'); }
+      else if (wraps[k].parentNode !== tools) tools.insertBefore(wraps[k], clearBtn);
+    });
+    document.querySelectorAll('.market-panel thead th[data-dim]').forEach(function (th) {
+      if (!th.firstElementChild) th.textContent = th.getAttribute('data-name') || th.textContent;
+    });
+  };
+  document.querySelectorAll('.market-panel thead th[data-dim]').forEach(function (th) { th.setAttribute('data-name', th.textContent); });
+  if (mq.addEventListener) mq.addEventListener('change', window.__placeSlicers);
+  window.__placeSlicers();
 })();
 
 /* Map tab: supply in green, demand in brass, both striped; the same commodity slicer applies */

@@ -69,6 +69,7 @@ function demoStore() {
     async load() { return rows.map((r) => ({ ...r })); },
     async save(id, payload) { if (id) rows = rows.map((r) => (r.id === id ? { ...payload, id } : r)); else rows.push({ ...payload, id: 'd' + (++seq) }); keep(); },
     async remove(id) { rows = rows.filter((r) => r.id !== id); keep(); },
+    async removeAll() { rows = []; keep(); },
     async importSeed() { /* not needed in preview */ },
   };
 }
@@ -93,6 +94,11 @@ async function firebaseStore(onUser) {
     async load() { const snap = await F.getDocs(F.collection(db, 'listings')); return snap.docs.map((d) => ({ id: d.id, ...d.data() })); },
     async save(id, payload) { if (id) await F.setDoc(F.doc(db, 'listings', id), payload); else await F.addDoc(F.collection(db, 'listings'), payload); await markLive(); },
     async remove(id) { await F.deleteDoc(F.doc(db, 'listings', id)); await markLive(); },
+    async removeAll() {
+      const snap = await F.getDocs(F.collection(db, 'listings'));
+      for (let i = 0; i < snap.docs.length; i += 400) { const b = F.writeBatch(db); snap.docs.slice(i, i + 400).forEach((d) => b.delete(d.ref)); await b.commit(); }
+      await markLive();
+    },
     async importSeed() {
       const batch = F.writeBatch(db), col = F.collection(db, 'listings');
       const pick = (t, r) => ({ type: t, commodity: r.commodity, origin: r.origin || '', volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: r.details || '', added: isoDay(), ...(t === 'demand' ? { port: r.port || '', country: r.country || '' } : {}) });
@@ -119,7 +125,7 @@ function button(label, cls, fn) {
 
 async function load() {
   listings = await store.load();
-  $('admin-import').hidden = !store.live || listings.length > 0 || sessionStorage.getItem('kabani-live') === '1';
+  $('admin-import').hidden = !store.live || listings.length > 0 || !(data.seed.supply.length + data.seed.demand.length) || sessionStorage.getItem('kabani-live') === '1';
   render();
 }
 
@@ -146,6 +152,7 @@ function render() {
   empty.hidden = rows.length > 0; empty.textContent = '';
   $('admin-list-title').textContent = (isDemand ? 'Demand' : 'Supply') + ' listings' + (picked.size ? ' (' + rows.length + ' of ' + all.length + ')' : '');
   document.querySelector('.admin-table').closest('.market-card').hidden = rows.length === 0;
+  $('admin-wipe-row').hidden = listings.length === 0;
   if (!rows.length) {
     if (picked.size && all.length) {
       empty.append('Nothing matches this selection. ');
@@ -214,6 +221,12 @@ $('admin-form').addEventListener('submit', async (e) => {
   } catch (err) { formError('Could not save (' + (err.code || err.message) + '). Check that you are signed in with the owner account and that firestore.rules is published.'); }
 });
 
+$('admin-wipe').addEventListener('click', async () => {
+  const n = listings.length;
+  if (!n || !confirm('Delete all ' + n + ' listings, supply and demand? This cannot be undone.')) return;
+  try { await store.removeAll(); await load(); }
+  catch (err) { formError('Could not delete the listings (' + (err.code || err.message) + ').'); }
+});
 async function remove(l) {
   if (!confirm('Delete the ' + (names[l.commodity] || l.commodity) + ' listing? This cannot be undone.')) return;
   try { await store.remove(l.id); notice('Listing deleted.'); await load(); }

@@ -768,3 +768,21 @@
     #panel-map .map-controls, #panel-map .map-hint { z-index: 2; }
     #panel-map #mm-svg .pin.is-sup, #panel-map #mm-svg .pin.is-dem, #panel-map #mm-svg .pin.is-both { fill: #1F4D3A; stroke: #F4F3EE; }
     .nav-logo .nav-lockup { height: 46px; width: auto; display: block; }
+
+    /* ── Slicers in the column headings of the Supply and Demand tables ── */
+    .market-table th.has-slicer { padding-top: 6px; padding-bottom: 6px; }
+    .market-table th .slicer { display: inline-block; position: relative; }
+    .market-table th .slicer-btn {
+      background: transparent; border: 0; border-radius: 8px; padding: 8px 8px 8px 6px; margin-left: -6px; gap: 6px; max-width: 170px;
+      font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; box-shadow: none;
+    }
+    .market-table th .slicer-btn svg { width: 12px; height: 12px; opacity: 0.7; transition: transform 0.2s; }
+    .market-table th .slicer-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .market-table th .slicer-btn:hover, .market-table th .slicer-btn[aria-expanded="true"] { background: var(--tan-pale); color: var(--tan); }
+    .market-table th .slicer-btn.is-filtered { background: var(--tan-pale); color: var(--tan); }
+    .market-table th .slicer-btn:focus-visible { outline: 3px solid var(--tan-light); outline-offset: 1px; }
+    .market-table th .slicer-panel { left: 0; right: auto; top: calc(100% + 4px); text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 500; color: var(--ink); white-space: normal; text-align: left; }
+    .market-table th[data-dim="added"] .slicer-panel, .market-table th[data-dim="when"] .slicer-panel { left: auto; right: 0; }
+    .market-table th.has-slicer .slicer-panel .slicer-opt { font-size: 14px; }
+    .admin-wipe { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
+    .admin-wipe[hidden] { display: none; }
