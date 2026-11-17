@@ -428,7 +428,26 @@
     .form-group label em { font-style: normal; font-weight: 600; letter-spacing: 0; text-transform: none; float: right; opacity: 0.8; }
     .admin-notice { font-size: 14px; font-weight: 600; color: var(--tan); margin: -4px 0 18px; }
     .admin-notice a { color: inherit; }
-    .admin-table td.cell-name, .market-table td.cell-name { min-width: 200px; max-width: 320px; }
+    .admin-table td.cell-name, .market-table td.cell-name { width: 15%; }
+    .market-table td.cell-name .row-note { max-width: 230px; }
+    @media (min-width: 721px) {
+      /* Column rhythm: compact gutters, and a floor per column so Volume and Quality read on one or two lines instead of three. */
+      .market-table th, .market-table td { padding-left: 14px; padding-right: 14px; }
+      .market-table th { white-space: nowrap; }
+      .market-table th:first-child, .market-table td:first-child { padding-left: 22px; }
+      .market-table th:last-child, .market-table td:last-child { padding-right: 22px; }
+      .market-table td.cell-name { max-width: 220px; }
+    }
+    @media (min-width: 1181px) { /* only where the page is wide enough for every column to keep its floor */
+      .market-table td.cell-name { min-width: 130px; }
+      .market-table td[data-label="Origin"] { min-width: 96px; }
+      .market-table td[data-label="Volume"] { min-width: 132px; }
+      .market-table td[data-label="Quality"] { min-width: 150px; }
+      .market-table td[data-label="Shipment"] { min-width: 112px; }
+      .market-table td.cell-date { min-width: 104px; }
+    }
+    @media (min-width: 721px) and (max-width: 1180px) { .market-table { font-size: 14px; } .market-table th { white-space: normal; } .market-table th, .market-table td { padding-left: 10px; padding-right: 10px; } .market-table th:first-child, .market-table td:first-child { padding-left: 16px; } .market-table th:last-child, .market-table td:last-child { padding-right: 16px; } .row-go { padding: 7px 12px; } }
+    .market-table td.cell-date { white-space: nowrap; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
     .row-note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px; font-size: 13px; line-height: 1.5; font-weight: 500; color: var(--ink-soft); }
     .admin-table .col-go .panel-showall { margin-left: 4px; }
     @media (max-width: 900px) { .admin-list-bar { position: static; height: auto; padding: 8px 0 12px; flex-wrap: wrap; } .market-table.admin-table thead th { top: auto; } }

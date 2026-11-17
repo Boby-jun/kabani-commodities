@@ -369,6 +369,13 @@ def market():
     def link(slug):
         return f'<a class="row-name" href="{slug}.html">{E(BY_SLUG[slug]["name"])}</a>'
 
+    def fmt_added(v):
+        try:
+            import datetime
+            return datetime.date.fromisoformat(v).strftime("%-d %b %Y")
+        except Exception:
+            return "—"
+
     def cells(r, kind):
         name = f'<td class="cell-name" data-label="Commodity">{link(r["commodity"])}' + (f'<span class="row-note">{E(r["details"])}</span>' if r.get("details") else "") + "</td>"
         origin = E(r.get("origin") or ("Shared on request" if kind == "supply" else "Any"))
@@ -376,6 +383,7 @@ def market():
                f'<td data-label="Quality">{E(r.get("quality") or "On request")}</td><td data-label="Shipment">{E(r.get("when") or "Flexible")}</td>')
         if kind == "demand":
             out += f'<td data-label="Destination">{E(r.get("port") or r.get("country") or "")}</td>'
+        out += f'<td class="cell-date" data-label="Date added">{fmt_added(r.get("added", ""))}</td>'
         label, role = ("Enquire", "Buyer") if kind == "supply" else ("Offer supply", "Supplier")
         return out + f'<td class="col-go">{_go("contact.html?commodity=" + E(BY_SLUG[r["commodity"]]["name"]) + "&amp;role=" + role, label)}</td>'
 
@@ -408,14 +416,14 @@ def market():
     <div class="section-inner market-body">
       <section class="market-panel" id="panel-supply" data-type="supply" role="tabpanel" aria-labelledby="tab-supply">
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{sup_rows}</tbody></table></div>
         {empty}
       </section>
       <section class="market-panel" id="panel-demand" data-type="demand" role="tabpanel" aria-labelledby="tab-demand" hidden>
         {sample_note}
         <div class="market-card"><table class="market-table">
-          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Destination</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th><th>Destination</th><th>Date added</th><th><span class="sr-only">Action</span></th></tr></thead>
           <tbody>{dem_rows}</tbody></table></div>
         {empty}
       </section>

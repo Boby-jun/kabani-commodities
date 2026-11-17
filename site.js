@@ -481,7 +481,7 @@ var MarketFilter = (function () {
     var docs = (res[1].documents || []).map(function (d) {
       return { type: str(d.fields, 'type'), commodity: str(d.fields, 'commodity'), volume: str(d.fields, 'volume'),
                origin: str(d.fields, 'origin'), when: str(d.fields, 'when'), port: str(d.fields, 'port'), country: str(d.fields, 'country'),
-               quality: str(d.fields, 'quality'), details: str(d.fields, 'details') };
+               quality: str(d.fields, 'quality'), details: str(d.fields, 'details'), added: str(d.fields, 'added') };
     }).filter(function (d) { return byslug[d.commodity] && (d.type === 'supply' || d.type === 'demand'); });
     docs.sort(function (a, b) { return order[a.commodity] - order[b.commodity] || a.origin.localeCompare(b.origin); });
     render('supply', docs.filter(function (d) { return d.type === 'supply'; }));
@@ -494,6 +494,10 @@ var MarketFilter = (function () {
     MarketStore.set(docs);
   }).catch(function () { /* keep the built-in listings */ });
 
+  function fmtAdded(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+    return m ? (+m[3]) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[2] - 1] + ' ' + m[1] : '—';
+  }
   function td(label, node) {
     var c = document.createElement('td'); c.setAttribute('data-label', label);
     c.appendChild(typeof node === 'string' ? document.createTextNode(node) : node); return c;
@@ -512,6 +516,7 @@ var MarketFilter = (function () {
       tr.appendChild(td('Quality', r.quality || 'On request'));
       tr.appendChild(td('Shipment', r.when || 'Flexible'));
       if (type === 'demand') tr.appendChild(td('Destination', r.port || r.country || ''));
+      var dc = td('Date added', fmtAdded(r.added)); dc.className = 'cell-date'; tr.appendChild(dc);
       var go = document.createElement('td'); go.className = 'col-go';
       var l = document.createElement('a'); l.className = 'row-go';
       l.href = 'contact.html?commodity=' + encodeURIComponent(byslug[r.commodity]) + '&role=' + (type === 'supply' ? 'Buyer' : 'Supplier');

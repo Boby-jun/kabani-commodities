@@ -21,6 +21,10 @@ for (const n of data.countries) { const o = document.createElement('option'); o.
   add('Flexible');
 })();
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const isoDay = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); // local date, as typed in the browser
+const fmtAdded = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? (+m[3]) + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1] : '—'; };
+
 let store = null, listings = [], tab = 'supply', editing = null;
 const picked = new Set(); // commodity slicer: nothing ticked shows everything
 
@@ -57,7 +61,7 @@ const expire = () => {
 function demoStore() {
   let seq = 0, rows = [];
   try { rows = JSON.parse(sessionStorage.getItem('kabani-demo') || 'null') || []; } catch (e) { /* storage blocked */ }
-  if (!rows.length) rows = SAMPLE.map((r) => ({ ...r, id: 'd' + (++seq) }));
+  if (!rows.length) rows = SAMPLE.map((r, i) => ({ ...r, added: isoDay(new Date(Date.now() - [0, 3, 9, 1, 20][i] * 864e5)), id: 'd' + (++seq) }));
   seq = rows.length + 100;
   const keep = () => { try { sessionStorage.setItem('kabani-demo', JSON.stringify(rows)); } catch (e) { /* ignore */ } };
   return {
@@ -91,7 +95,7 @@ async function firebaseStore(onUser) {
     async remove(id) { await F.deleteDoc(F.doc(db, 'listings', id)); await markLive(); },
     async importSeed() {
       const batch = F.writeBatch(db), col = F.collection(db, 'listings');
-      const pick = (t, r) => ({ type: t, commodity: r.commodity, origin: r.origin || '', volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: r.details || '', ...(t === 'demand' ? { port: r.port || '', country: r.country || '' } : {}) });
+      const pick = (t, r) => ({ type: t, commodity: r.commodity, origin: r.origin || '', volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: r.details || '', added: isoDay(), ...(t === 'demand' ? { port: r.port || '', country: r.country || '' } : {}) });
       for (const r of data.seed.supply) batch.set(F.doc(col), pick('supply', r));
       for (const r of data.seed.demand) batch.set(F.doc(col), pick('demand', r));
       batch.set(F.doc(db, 'meta', 'live'), { updatedAt: F.serverTimestamp() }, { merge: true });
@@ -124,7 +128,7 @@ function render() {
   const isDemand = tab === 'demand';
   const all = listings.filter((l) => l.type === tab);
   const rows = all.filter((l) => !picked.size || picked.has(l.commodity)).sort((a, b) => (order[a.commodity] ?? 99) - (order[b.commodity] ?? 99) || (a.origin || '').localeCompare(b.origin || ''));
-  $('admin-thead').innerHTML = '<tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th>' + (isDemand ? '<th>Destination</th>' : '') + '<th><span class="sr-only">Actions</span></th></tr>';
+  $('admin-thead').innerHTML = '<tr><th>Commodity</th><th>Origin</th><th>Volume</th><th>Quality</th><th>Shipment</th>' + (isDemand ? '<th>Destination</th>' : '') + '<th>Date added</th><th><span class="sr-only">Actions</span></th></tr>';
   const tbody = $('admin-tbody'); tbody.textContent = '';
   for (const l of rows) {
     const tr = document.createElement('tr');
@@ -133,6 +137,7 @@ function render() {
     if (l.details) { const n = document.createElement('span'); n.className = 'row-note'; n.textContent = l.details; nameCell.append(n); }
     tr.append(nameCell, cell(l.origin || (isDemand ? 'Any' : 'Shared on request'), 'Origin'), cell(l.volume || '', 'Volume'), cell(l.quality || 'On request', 'Quality'), cell(l.when || 'Flexible', 'Shipment'));
     if (isDemand) tr.append(cell([l.port, l.country].filter(Boolean).join(', '), 'Destination'));
+    const added = cell(fmtAdded(l.added), 'Date added'); added.className = 'cell-date'; tr.append(added);
     const actions = document.createElement('td'); actions.className = 'col-go';
     actions.append(button('Edit', 'panel-showall', () => fill(l, true)), ' ', button('Duplicate', 'panel-showall', () => fill(l, false)), ' ', button('Delete', 'panel-showall admin-del', () => remove(l)));
     tr.append(actions); tbody.append(tr);
@@ -193,6 +198,8 @@ $('admin-form').addEventListener('submit', async (e) => {
   e.preventDefault(); formError(''); notice('');
   const v = (k) => $('f-' + k).value.trim();
   const payload = { type: tab, commodity: sel.value, origin: v('origin'), volume: v('volume'), quality: v('quality'), when: v('when'), details: v('details') };
+  const prev = editing && listings.find((x) => x.id === editing);
+  payload.added = (prev && prev.added) || isoDay(); // set once when the listing is created; kept on later edits
   if (tab === 'demand') { payload.port = v('port'); payload.country = v('country'); }
   for (const [field, label] of [['origin', 'Country of origin'], ['country', 'Destination country']]) {
     const place = payload[field];

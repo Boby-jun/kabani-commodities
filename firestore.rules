@@ -22,6 +22,7 @@ service cloud.firestore {
         && (!('when' in request.resource.data) || ok(request.resource.data.when))
         && (!('port' in request.resource.data) || ok(request.resource.data.port))
         && (!('country' in request.resource.data) || ok(request.resource.data.country))
+        && (!('added' in request.resource.data) || ok(request.resource.data.added))
         && (!('quality' in request.resource.data) || ok(request.resource.data.quality))
         && (!('details' in request.resource.data) || (request.resource.data.details is string && request.resource.data.details.size() <= 600));
       allow delete: if isOwner();
