@@ -748,3 +748,22 @@
     nav .nav-cta:hover { color: var(--tan); }
     .hamburger span { background: var(--cream-soft); }
     nav .nav-login:focus-visible, nav .nav-links a:focus-visible { outline-color: var(--tan-light); }
+
+    /* ── SUPPLY & DEMAND MAP: same look as the home-page sourcing map (photo, cream land). Supply = brass, demand = mint, both = stripes. ── */
+    #panel-map .map-stage { background: #1A1F21 url("images/sourcing-ship.jpg") 50% 62% / cover no-repeat; border-color: transparent; }
+    #panel-map .map-stage::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31,77,58,0.70), rgba(26,45,37,0.82)); }
+    #panel-map #mm-svg .land { fill: #F4F3EE; fill-opacity: 0.93; stroke: rgba(31,77,58,0.38); }
+    #panel-map #mm-svg .land.is-sup { fill: #C9A75E; fill-opacity: 1; stroke: #F4F3EE; }
+    #panel-map #mm-svg .land.is-dem { fill: #58A67F; fill-opacity: 1; stroke: #F4F3EE; }
+    #panel-map #mm-svg .land.is-both { fill: url(#pBoth); fill-opacity: 1; stroke: #F4F3EE; }
+    #panel-map #mm-svg .land.is-listed:hover { opacity: 0.88; }
+    #panel-map #mm-svg .land.is-selected, #panel-map #mm-svg .land.is-selected:hover { fill: #FFFFFF; stroke: #FFFFFF; stroke-width: 2px; }
+    #panel-map #mm-svg .pin { stroke: #F4F3EE; }
+    #panel-map #mm-svg .pin.is-sup { fill: #C9A75E; } #panel-map #mm-svg .pin.is-dem { fill: #58A67F; } #panel-map #mm-svg .pin.is-both { fill: url(#gBoth); }
+    #panel-map .map-hint { color: rgba(244,243,238,0.85); }
+    .sw-sup { background: #C9A75E; } .sw-dem { background: #58A67F; } .sw-both { background: repeating-linear-gradient(45deg, #C9A75E 0 4px, #58A67F 4px 8px); }
+    .mm-badge.is-sup { background: #C9A75E; color: var(--ink); } .mm-badge.is-dem { background: #58A67F; color: var(--ink); }
+    #panel-map .map-stage::before { z-index: 0; }
+    #panel-map #mm-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+    #panel-map .map-controls, #panel-map .map-hint { z-index: 2; }
+    #panel-map #mm-svg .pin.is-sup, #panel-map #mm-svg .pin.is-dem, #panel-map #mm-svg .pin.is-both { fill: #1F4D3A; stroke: #F4F3EE; }

@@ -342,8 +342,8 @@ def market_map_svg():
         for n, v in MAPDATA["countries"].items())
     return (f'<svg id="mm-svg" class="world-map" viewBox="{-PAD:g} {VBY:.2f} {VBW:g} {VBH:.2f}" data-w="{W:g}" data-h="{H:g}" data-pad="{PAD:g}" '
             f'preserveAspectRatio="xMidYMid meet" focusable="false">'
-            f'<defs><linearGradient id="gBoth" x1="0" y1="0" x2="1" y2="1"><stop offset="50%" stop-color="#1F4D3A"/><stop offset="50%" stop-color="#C9A75E"/></linearGradient>'
-            f'<pattern id="pBoth" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#1F4D3A"/><rect x="4" width="4" height="8" fill="#C9A75E"/></pattern></defs>'
+            f'<defs><linearGradient id="gBoth" x1="0" y1="0" x2="1" y2="1"><stop offset="50%" stop-color="#C9A75E"/><stop offset="50%" stop-color="#58A67F"/></linearGradient>'
+            f'<pattern id="pBoth" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#C9A75E"/><rect x="4" width="4" height="8" fill="#58A67F"/></pattern></defs>'
             f'<g class="lands">{paths}</g></svg>')
 
 def group_options():
