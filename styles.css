@@ -265,6 +265,16 @@
       box-shadow: 0 1px 2px rgba(26,31,33,0.05), 0 16px 40px -18px rgba(26,31,33,0.16);
       aspect-ratio: 1000 / 439; width: 100%; min-width: 0; align-self: start; touch-action: pan-y; cursor: grab; outline: none;
     }
+    /* Photo behind the home-page sourcing map: the picture is tinted bottle green so land and the brass source countries stay legible on top of it. */
+    #sourcing .map-stage { background: #1A1F21 url("images/sourcing-ship.jpg") 50% 62% / cover no-repeat; border-color: transparent; }
+    #sourcing .map-stage::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31,77,58,0.70), rgba(26,45,37,0.82)); }
+    #sourcing #world-map .land { fill: #F4F3EE; fill-opacity: 0.93; stroke: rgba(31,77,58,0.38); }
+    #sourcing #world-map .land.is-source { fill: var(--tan-light); fill-opacity: 1; stroke: #F4F3EE; }
+    #sourcing #world-map .land.is-source:hover { fill: #D9BC78; }
+    #sourcing #world-map .land.is-source.is-active, #sourcing #world-map .land.is-source.is-active:hover { fill: #FFFFFF; }
+    #sourcing #world-map .pin { fill: var(--tan); }
+    #sourcing #world-map .pin.is-active { fill: var(--tan); }
+    #sourcing .map-hint { color: rgba(244,243,238,0.85); }
     .map-stage.is-dragging { cursor: grabbing; }
     .map-stage:focus-visible { box-shadow: 0 0 0 3px var(--tan-light); }
     #world-map { display: block; position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
