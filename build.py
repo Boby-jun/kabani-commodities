@@ -244,10 +244,16 @@ def index():
   </section>
 """ + FOOT
 
+# About-page pillar icons: drawn for Kabani, one 24px grid, one stroke. Verified = a hallmark rosette with a check;
+# reach = one grounded origin node fanning out to buyers; confidential = two sides with the private middle held between them.
+_PILLAR_VERIFIED = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9.5" r="6"/><path d="m9.2 9.6 2 2 3.6-3.9"/><path d="M8.6 14.6 7.2 21l4.8-2.5 4.8 2.5-1.4-6.4"/></svg>'
+_PILLAR_REACH = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="17" r="2.3"/><circle cx="12" cy="5.4" r="1.9"/><circle cx="4.6" cy="6.4" r="1.9"/><circle cx="19.4" cy="6.4" r="1.9"/><path d="M12 14.5V7.5M10.6 15 5.8 8.1M13.4 15l4.8-6.9M6.5 21.2h11"/></svg>'
+_PILLAR_PRIVATE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M12 6.57A6.2 6.2 0 0 1 12 17.43A6.2 6.2 0 0 1 12 6.57Z"/><circle cx="9" cy="12" r="6.2"/><circle cx="15" cy="12" r="6.2"/><circle cx="12" cy="11" r="1.1"/><path d="M12 12.2v2"/></svg>'
+
 def about():
-    pillars = [("✓", "Verified Counterparties", "We vet buyers and suppliers before making an introduction, protecting both sides from wasted time and bad-faith actors."),
-               ("🌍", "Global Reach, Local Roots", "Deep relationships with cooperatives, processors, and producers at origin, paired with an international network of buyers across sectors."),
-               ("🤝", "Confidential &amp; Independent", "We represent the transaction, not one side of it — structuring every introduction with discretion, impartiality, and care.")]
+    pillars = [(_PILLAR_VERIFIED, "Verified Counterparties", "We vet buyers and suppliers before making an introduction, protecting both sides from wasted time and bad-faith actors."),
+               (_PILLAR_REACH, "Global Reach, Local Roots", "Deep relationships with cooperatives, processors, and producers at origin, paired with an international network of buyers across sectors."),
+               (_PILLAR_PRIVATE, "Confidential &amp; Independent", "We represent the transaction, not one side of it — structuring every introduction with discretion, impartiality, and care.")]
     ph = "\n".join(f'        <div class="pillar"><div class="pillar-icon">{i}</div><h3 class="pillar-title">{t}</h3><p class="pillar-body">{b}</p></div>' for i, t, b in pillars)
     return head("About us — Kabani Commodities", "The principles behind every introduction Kabani Commodities makes.") + nav("about") + f"""
   <header class="page-header">
