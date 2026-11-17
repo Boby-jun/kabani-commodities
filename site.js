@@ -197,11 +197,26 @@ var MarketStore = (function () {
 
 /* The commodity slicer's selection, shared by both lists and the map. Nothing selected means everything. */
 var MarketFilter = (function () {
-  var sel = {}, subs = [];
+  var sel = {}, subs = [], dims = { origin: {}, volume: {}, quality: {}, when: {} };
+  // what a listing shows in each column, with the same fallbacks the tables use
+  function val(l, d) {
+    if (d === 'origin') return l.origin || (l.type === 'supply' ? 'Shared on request' : 'Any');
+    if (d === 'when') return l.when || 'Flexible';
+    return l[d] || 'On request';
+  }
+  function fire() { subs.forEach(function (f) { f(); }); }
+  function dimOk(v) { return Object.keys(dims).every(function (d) { return !Object.keys(dims[d]).length || !!dims[d][v[d]]; }); }
   return {
     has: function (slug) { return Object.keys(sel).length === 0 || !!sel[slug]; },
     list: function () { return Object.keys(sel); },
-    set: function (slugs) { sel = {}; slugs.forEach(function (s) { sel[s] = true; }); subs.forEach(function (f) { f(); }); },
+    set: function (slugs) { sel = {}; slugs.forEach(function (s) { sel[s] = true; }); fire(); },
+    dim: function (d) { return Object.keys(dims[d]); },
+    setDim: function (d, vals) { dims[d] = {}; vals.forEach(function (x) { dims[d][x] = true; }); fire(); },
+    val: val,
+    match: function (l) { return this.has(l.commodity) && dimOk({ origin: val(l, 'origin'), volume: val(l, 'volume'), quality: val(l, 'quality'), when: val(l, 'when') }); },
+    matchRow: function (slug, v) { return this.has(slug) && dimOk(v); },
+    active: function () { return Object.keys(sel).length > 0 || Object.keys(dims).some(function (d) { return Object.keys(dims[d]).length > 0; }); },
+    clear: function () { sel = {}; Object.keys(dims).forEach(function (d) { dims[d] = {}; }); fire(); },
     on: function (f) { subs.push(f); }
   };
 })();
@@ -238,7 +253,7 @@ var MarketFilter = (function () {
   var boxes = panel.querySelectorAll('input[type="checkbox"][value]'), topicBoxes = panel.querySelectorAll('input[data-topic]');
   function setOpen(o) { panel.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false'); }
   btn.addEventListener('click', function () { setOpen(panel.hidden); });
-  document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('.slicer')) setOpen(false); });
+  document.addEventListener('click', function (e) { if (!panel.hidden && e.target.closest('.slicer') !== btn.closest('.slicer')) setOpen(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
   function pushFromBoxes() { MarketFilter.set([].filter.call(boxes, function (b) { return b.checked; }).map(function (b) { return b.value; })); }
   boxes.forEach(function (b) { b.addEventListener('change', pushFromBoxes); });
@@ -249,13 +264,13 @@ var MarketFilter = (function () {
       pushFromBoxes();
     });
   });
-  function clearAll() { MarketFilter.set([]); }
+  function clearAll() { MarketFilter.clear(); }
   clearBtn.addEventListener('click', clearAll);
   document.querySelectorAll('[data-clear]').forEach(function (b) { b.addEventListener('click', clearAll); });
 
   function labelText() {
     var a = MarketFilter.list();
-    if (!a.length) return 'All commodities';
+    if (!a.length) return 'Commodity';
     if (a.length === 1) return byslug[a[0]];
     for (var i = 0; i < topics.length; i++) {
       var t = topics[i];
@@ -267,7 +282,8 @@ var MarketFilter = (function () {
     document.querySelectorAll('.market-panel[data-type="supply"], .market-panel[data-type="demand"]').forEach(function (p) {
       var visible = 0;
       p.querySelectorAll('tbody tr').forEach(function (r) {
-        var off = !MarketFilter.has(r.getAttribute('data-commodity'));
+        var cell = function (label) { var c = r.querySelector('td[data-label="' + label + '"]'); return c ? c.textContent.trim() : ''; };
+        var off = !MarketFilter.matchRow(r.getAttribute('data-commodity'), { origin: cell('Origin'), volume: cell('Volume'), quality: cell('Quality'), when: cell('Shipment') });
         r.classList.toggle('is-filtered', off); if (!off) visible++;
       });
       var empty = p.querySelector('.market-empty'); if (empty) empty.hidden = visible > 0;
@@ -285,7 +301,7 @@ var MarketFilter = (function () {
     });
     labelEl.textContent = labelText();
     btn.classList.toggle('is-filtered', a.length > 0);
-    clearBtn.hidden = a.length === 0;
+    clearBtn.hidden = !MarketFilter.active();
     applyRows();
   }
   MarketFilter.on(sync);
@@ -297,6 +313,65 @@ var MarketFilter = (function () {
   sync();
 })();
 
+/* Slicers for Origin, Volume, Quality and Shipment, next to the commodity slicer. Options come from the listings shown. */
+(function columnSlicers() {
+  var tools = document.querySelector('.market-tools'), clearBtn = document.getElementById('slicer-clear'), first = document.getElementById('slicer-btn');
+  if (!tools || !clearBtn || !first) return;
+  var DIMS = [['origin', 'Origin'], ['volume', 'Volume'], ['quality', 'Quality'], ['when', 'Shipment']], parts = {};
+  var chevron = first.querySelector('svg').outerHTML;
+
+  function closeAll(except) {
+    DIMS.forEach(function (d) { var p = parts[d[0]]; if (p.panel !== except && !p.panel.hidden) { p.panel.hidden = true; p.btn.setAttribute('aria-expanded', 'false'); } });
+  }
+  DIMS.forEach(function (d) {
+    var wrap = document.createElement('div'); wrap.className = 'slicer';
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'slicer-btn'; btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="slicer-label">' + d[1] + '</span>' + chevron;
+    var panel = document.createElement('div'); panel.className = 'slicer-panel col-panel'; panel.hidden = true; panel.setAttribute('role', 'group'); panel.setAttribute('aria-label', 'Choose ' + d[1].toLowerCase() + ' values');
+    wrap.appendChild(btn); wrap.appendChild(panel); tools.insertBefore(wrap, clearBtn);
+    parts[d[0]] = { wrap: wrap, btn: btn, panel: panel, label: btn.querySelector('.slicer-label'), name: d[1] };
+    btn.addEventListener('click', function () {
+      var open = panel.hidden; closeAll(panel); panel.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) { var f = document.getElementById('slicer-panel'); if (f && !f.hidden) first.click(); }
+    });
+    document.addEventListener('click', function (e) { if (!panel.hidden && e.target.closest('.slicer') !== wrap) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); } });
+  });
+  first.addEventListener('click', function () { closeAll(null); });
+
+  function build() {
+    var list = MarketStore.get();
+    DIMS.forEach(function (d) {
+      var key = d[0], p = parts[key], seen = {}, vals = [];
+      list.forEach(function (l) { var v = MarketFilter.val(l, key); if (!seen[v]) { seen[v] = true; vals.push(v); } });
+      vals.sort(function (x, y) { return x.localeCompare(y, undefined, { numeric: true }); });
+      var keep = MarketFilter.dim(key).filter(function (v) { return seen[v]; });
+      p.panel.textContent = '';
+      var hint = document.createElement('p'); hint.className = 'slicer-hint'; hint.textContent = vals.length ? 'Tick the values to show. Nothing ticked shows all.' : 'Nothing listed yet.'; p.panel.appendChild(hint);
+      vals.forEach(function (v) {
+        var lab = document.createElement('label'); lab.className = 'slicer-opt';
+        var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = v; cb.checked = keep.indexOf(v) >= 0;
+        cb.addEventListener('change', function () {
+          MarketFilter.setDim(key, [].filter.call(p.panel.querySelectorAll('input'), function (i) { return i.checked; }).map(function (i) { return i.value; }));
+        });
+        var s = document.createElement('span'); s.textContent = v; lab.appendChild(cb); lab.appendChild(s); p.panel.appendChild(lab);
+      });
+      if (keep.length !== MarketFilter.dim(key).length) MarketFilter.setDim(key, keep);
+    });
+    paint();
+  }
+  function paint() {
+    DIMS.forEach(function (d) {
+      var p = parts[d[0]], a = MarketFilter.dim(d[0]);
+      [].forEach.call(p.panel.querySelectorAll('input'), function (i) { i.checked = a.indexOf(i.value) >= 0; });
+      p.label.textContent = p.name + (a.length === 1 ? ' · ' + a[0] : a.length > 1 ? ' · ' + a.length : '');
+      p.btn.classList.toggle('is-filtered', a.length > 0);
+    });
+  }
+  MarketStore.on(build);
+  MarketFilter.on(paint);
+})();
+
 /* Map tab: supply in green, demand in brass, both striped; the same commodity slicer applies */
 (function marketMap() {
   var stage = document.getElementById('mm-stage'), svg = document.getElementById('mm-svg'), box = document.getElementById('mm-results');
@@ -306,7 +381,7 @@ var MarketFilter = (function () {
   var mode = 'both', selected = null, paths = {}, view = null;
   svg.querySelectorAll('path[data-country]').forEach(function (p) { paths[p.getAttribute('data-country')] = p; });
 
-  function matches(l) { return (mode === 'both' || l.type === mode) && MarketFilter.has(l.commodity); }
+  function matches(l) { return (mode === 'both' || l.type === mode) && MarketFilter.match(l); }
   function countryOf(l) { return l.type === 'supply' ? l.origin : l.country; }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
   function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
@@ -448,6 +523,11 @@ var MarketFilter = (function () {
 
 /* Log in: opens a small dialog. Creating an account is not available yet, so it says so. */
 (function loginDialog() {
+  var admin = false;
+  try { admin = localStorage.getItem('kabani-admin') === '1'; } catch (e) { /* storage blocked */ }
+  if (admin) { // signed in as the owner before: the link goes straight to the admin page
+    document.querySelectorAll('a[data-login]').forEach(function (a) { a.textContent = 'Admin'; a.href = 'admin.html'; a.classList.add('is-admin'); a.removeAttribute('data-login'); });
+  }
   var dlg = document.getElementById('login-dialog');
   if (!dlg || typeof dlg.showModal !== 'function') return; // without dialog support the links go straight to admin.html
   var note = document.getElementById('login-note');

@@ -206,11 +206,12 @@ $('admin-import-btn').addEventListener('click', async () => {
   try {
     await firebaseStore(async (user) => {
       $('admin-user').hidden = !user;
-      if (!user) { show('admin-signin'); return; }
+      const remember = (on) => { try { if (on) localStorage.setItem('kabani-admin', '1'); else localStorage.removeItem('kabani-admin'); } catch (e) { /* storage blocked */ } };
+      if (!user) { remember(false); show('admin-signin'); return; }
       $('admin-email').textContent = user.email;
       const owner = user.email && user.email.toLowerCase() === cfg.ownerEmail.toLowerCase() && user.emailVerified;
-      if (!owner) { show('admin-denied'); return; }
-      show('admin-app'); await load();
+      if (!owner) { remember(false); show('admin-denied'); return; }
+      remember(true); show('admin-app'); await load();
     });
   } catch (err) {
     show('admin-signin'); $('admin-error').textContent = 'Could not reach the sign-in service (' + (err.message || err) + ').'; $('admin-error').hidden = false;

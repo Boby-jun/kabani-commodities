@@ -411,6 +411,8 @@
     .admin-card[hidden], #admin-app[hidden], .admin-user[hidden], .admin-import[hidden], .form-row[hidden], .admin-error[hidden] { display: none; }
     .admin-table .col-go { white-space: nowrap; }
     .admin-list-bar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 68px; background: var(--cream-soft); }
+    .nav-login.is-admin { border: 1px solid var(--border); border-radius: 999px; padding: 9px 18px; background: var(--white); color: var(--ink); font-weight: 700; }
+    .nav-login.is-admin:hover { border-color: var(--tan); color: var(--tan); }
     .admin-list-bar h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
     .market-table.admin-table thead th { top: 68px; }
     .admin-empty-clear { font: inherit; }
@@ -508,6 +510,11 @@
       box-shadow: 0 2px 6px rgba(26,31,33,0.06), 0 22px 44px -14px rgba(26,31,33,0.22);
     }
     .slicer-panel[hidden] { display: none; }
+    .slicer-panel.col-panel { width: 260px; }
+    .market-tools { flex-wrap: nowrap; gap: 6px; }
+    .market-bar-inner { gap: 16px; }
+    .slicer-btn { white-space: nowrap; max-width: 220px; padding: 11px 13px; gap: 8px; font-size: 13.5px; }
+    .slicer-label { overflow: hidden; text-overflow: ellipsis; }
     .slicer-hint { font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); margin-bottom: 8px; }
     .slicer-group { border: 0; padding: 8px 0 6px; border-top: 1px solid var(--border); }
     .slicer-group:first-of-type { border-top: 0; }
@@ -536,12 +543,16 @@
     .market-foot { margin-top: 20px; }
     @media (max-width: 720px) { .market-table td { border-bottom: 0; } }
     #panel-map .mm-controls { margin-top: 2px; }
-    @media (max-width: 900px) {
+    @media (max-width: 1180px) {
       .market-bar { position: static; height: auto; }
       .market-bar-inner { flex-wrap: wrap; padding: 14px 0 12px; gap: 12px 14px; }
-      .market-tools { margin-left: 0; width: 100%; }
+      .market-tools { margin-left: 0; width: 100%; flex-wrap: wrap; }
       .slicer-panel { left: 0; right: auto; width: min(340px, calc(100vw - 48px)); }
       .market-table thead th { position: static; }
+    }
+    @media (max-width: 720px) {
+      .slicer { position: static; }
+      .market-tools .slicer-panel, .market-tools .slicer-panel.col-panel { left: 0; right: 0; width: auto; }
     }
 
 

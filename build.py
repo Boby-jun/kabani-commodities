@@ -353,7 +353,7 @@ def slicer_html():
         opts = "".join(f'<label class="slicer-opt"><input type="checkbox" value="{s}" /><span>{E(BY_SLUG[s]["name"])}</span></label>' for s in slugs)
         groups += (f'<fieldset class="slicer-group"><legend><label class="slicer-opt slicer-topic"><input type="checkbox" data-topic="{tid}" /><span>{E(tname)}</span></label></legend>{opts}</fieldset>')
     return (f'<div class="slicer"><button type="button" class="slicer-btn" id="slicer-btn" aria-haspopup="true" aria-expanded="false" aria-controls="slicer-panel">'
-            f'<span class="slicer-label">All commodities</span><svg viewBox="0 0 12 8" aria-hidden="true" width="12" height="8"><path d="M1 1.5 6 6.5 11 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+            f'<span class="slicer-label">Commodity</span><svg viewBox="0 0 12 8" aria-hidden="true" width="12" height="8"><path d="M1 1.5 6 6.5 11 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
             f'<div class="slicer-panel" id="slicer-panel" role="group" aria-label="Choose commodities" hidden>'
             f'<p class="slicer-hint">Tick the commodities to show. Nothing ticked shows all.</p>{groups}</div></div>')
 
