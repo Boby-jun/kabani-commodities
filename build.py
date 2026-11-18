@@ -304,10 +304,13 @@ def contact():
             <div class="form-group"><label for="fn">First name</label><input id="fn" name="first_name" type="text" placeholder="e.g. Maria" autocomplete="given-name" required /></div>
             <div class="form-group"><label for="ln">Last name</label><input id="ln" name="last_name" type="text" placeholder="e.g. Keller" autocomplete="family-name" required /></div>
           </div>
-          <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
-          <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
+          <div class="form-row">
+            <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
+            <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
+          </div>
         </div>
         <div class="form-section">
+          <div class="form-row form-row-top">
           <fieldset class="form-group"><legend>I am a <span class="opt">optional</span></legend><div class="chip-row">{roles}</div></fieldset>
           <div class="form-group">
             <span class="ms-label" id="ms-label">Commodities of interest <span class="opt">optional</span></span>
@@ -316,6 +319,7 @@ def contact():
               <div class="ms-panel" id="ms-panel" role="group" aria-label="Commodities of interest" hidden>{chips}</div>
             </div>
             <div class="ms-other" id="ms-other-wrap" hidden><label for="ms-other-text">Which commodity?</label><input id="ms-other-text" name="other_commodity" type="text" maxlength="120" placeholder="e.g. Cocoa, cashew, maize" autocomplete="off" /></div>
+          </div>
           </div>
           <div class="form-group"><label for="msg">Your requirement <span class="opt">optional</span></label><textarea id="msg" name="requirement" rows="5" placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
         </div>

@@ -877,3 +877,12 @@
       .contact-form .form-section + .form-section { padding-top: 36px; }
       .contact-form .form-row { gap: 24px; }
     }
+
+    /* ── Contact page: taller photo, form card pulled up into it ── */
+    .contact-banner { padding: 84px 0 330px; background-position: center 58%; }
+    .contact-layout { margin-top: -262px; }
+    .contact-form .form-row-top { align-items: start; }
+    .contact-form .ms-panel { left: auto; right: 0; width: min(500px, calc(100vw - 48px)); }
+    .contact-form .form-row-top .chip-row { gap: 10px; }
+    @media (max-width: 900px) { .contact-banner { padding: 56px 0 190px; } .contact-layout { margin-top: -130px; } }
+    @media (max-width: 720px) { .contact-form .ms-panel { left: 0; right: 0; width: auto; } .contact-banner { padding: 48px 0 170px; } .contact-layout { margin-top: -120px; } }
