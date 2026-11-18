@@ -635,6 +635,14 @@ if inline:
     cfgjs = open(os.path.join(HERE, "firebase-config.js"), encoding="utf-8").read()
     for k in pages:
         pages[k] = pages[k].replace('<link rel="stylesheet" href="styles.css" />', f"<style>\n{css}</style>").replace('<script src="site.js"></script>', f"<script>\n{js}</script>").replace('<script src="firebase-config.js"></script>', f"<script>\n{cfgjs}</script>")
+if not inline:
+    # Fingerprint the assets so browsers fetch the new CSS/JS after every deploy instead of a cached copy.
+    import hashlib
+    def _v(fn):
+        return hashlib.md5(open(os.path.join(HERE, fn), "rb").read()).hexdigest()[:8]
+    for k in pages:
+        for fn in ("styles.css", "site.js", "admin.js", "firebase-config.js"):
+            pages[k] = pages[k].replace(f'"{fn}"', f'"{fn}?v={_v(fn)}"')
 for name, content in pages.items():
     open(os.path.join(out, name), "w", encoding="utf-8").write(content)
 print(f"wrote {len(pages)} pages to {out}")
