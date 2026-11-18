@@ -821,3 +821,35 @@
       .contact-form .form-row { gap: 20px; }
       .contact-form .form-submit { align-self: stretch; min-height: 52px; }
     }
+
+    /* ── Contact form: spacing between groups, and the commodities dropdown ── */
+    .contact-form .form-section { gap: 28px; }
+    .contact-form .form-group legend { margin-bottom: 14px; }
+    .contact-form .ms-label { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+    .contact-form .ms { position: relative; }
+    .contact-form .ms-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer;
+      font: 500 15px/1.3 'Montserrat', sans-serif; color: #6A716D; background: var(--white); border: 1px solid #8F9792; border-radius: 12px; padding: 13px 15px; min-height: 48px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .contact-form .ms-btn.has-value { color: var(--ink); }
+    .contact-form .ms-btn:hover { border-color: var(--ink-soft); }
+    .contact-form .ms-btn:focus-visible, .contact-form .ms-btn[aria-expanded="true"] { outline: none; border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .contact-form .ms-btn svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s; }
+    .contact-form .ms-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .contact-form .ms-panel {
+      position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; max-height: 340px; overflow: auto; padding: 8px;
+      background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: 0 2px 6px rgba(26,31,33,0.06), 0 22px 44px -14px rgba(26,31,33,0.22);
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px;
+    }
+    .contact-form .ms-panel[hidden] { display: none; }
+    .contact-form .ms-opt { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+    .contact-form .ms-opt:hover { background: var(--cream-soft); }
+    .contact-form .ms-opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--tan); flex: none; }
+    .contact-form .ms-other { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .contact-form .ms-other[hidden] { display: none; }
+    .contact-form .ms-other label { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+    .contact-form .ms-other input { font-family: 'Montserrat', sans-serif; font-size: 15px; width: 100%; background: var(--white); border: 1px solid #8F9792; border-radius: 12px; padding: 13px 15px; min-height: 48px; color: var(--ink); outline: none; }
+    .contact-form .ms-other input:focus { border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    @media (max-width: 720px) { .contact-form .ms-panel { grid-template-columns: 1fr; max-height: 300px; } }

@@ -285,8 +285,8 @@ _ICON_MAIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" widt
 _ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3.4l1.6 4-2 1.3a11 11 0 0 0 6.7 6.7l1.3-2 4 1.6V19a1.8 1.8 0 0 1-2 1.8A15.6 15.6 0 0 1 3.2 6 1.8 1.8 0 0 1 5 4Z"/></svg>'
 
 def contact():
-    chips = "".join(f'<label class="chip"><input type="checkbox" name="commodity" value="{E(c["name"])}" /><span>{E(c["name"])}</span></label>' for c in ITEMS)
-    chips += '<label class="chip"><input type="checkbox" name="commodity" value="Other" /><span>Other</span></label>'
+    chips = "".join(f'<label class="ms-opt"><input type="checkbox" name="commodity" value="{E(c["name"])}" /><span>{E(c["name"])}</span></label>' for c in ITEMS)
+    chips += '<label class="ms-opt"><input type="checkbox" name="commodity" value="Other" id="ms-other" /><span>Other</span></label>'
     roles = "".join(f'<label class="chip"><input type="radio" name="role" value="{r}" /><span>{r}</span></label>' for r in ("Buyer", "Supplier", "Both"))
     return head("Get in touch — Kabani Commodities", "Contact Kabani Commodities about buying or selling a commodity.") + nav("contact") + f"""
   <header class="contact-banner">
@@ -305,14 +305,18 @@ def contact():
             <div class="form-group"><label for="ln">Last name</label><input id="ln" name="last_name" type="text" placeholder="e.g. Keller" autocomplete="family-name" required /></div>
           </div>
           <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
-          <div class="form-row">
-            <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
-            <div class="form-group"><label for="ct">Country <span class="opt">optional</span></label><input id="ct" name="country" type="text" placeholder="e.g. Switzerland" autocomplete="country-name" /></div>
-          </div>
+          <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
         </div>
         <div class="form-section">
           <fieldset class="form-group"><legend>I am a <span class="opt">optional</span></legend><div class="chip-row">{roles}</div></fieldset>
-          <fieldset class="form-group"><legend>Commodities of interest <span class="opt">optional</span></legend><div class="chip-row">{chips}</div></fieldset>
+          <div class="form-group">
+            <span class="ms-label" id="ms-label">Commodities of interest <span class="opt">optional</span></span>
+            <div class="ms" id="ms">
+              <button type="button" class="ms-btn" id="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-label ms-value"><span class="ms-value" id="ms-value">Select commodities</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              <div class="ms-panel" id="ms-panel" role="group" aria-label="Commodities of interest" hidden>{chips}</div>
+            </div>
+            <div class="ms-other" id="ms-other-wrap" hidden><label for="ms-other-text">Which commodity?</label><input id="ms-other-text" name="other_commodity" type="text" maxlength="120" placeholder="e.g. Cocoa, cashew, maize" autocomplete="off" /></div>
+          </div>
           <div class="form-group"><label for="msg">Your requirement <span class="opt">optional</span></label><textarea id="msg" name="requirement" rows="5" placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
         </div>
         <button type="submit" class="form-submit">Send message</button>

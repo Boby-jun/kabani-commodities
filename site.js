@@ -26,6 +26,30 @@ function handleContactForm(e) {
   }
 })();
 
+/* Contact form: commodities as a multiple-choice dropdown; ticking "Other" opens a box to name the commodity */
+(function commodityDropdown() {
+  var ms = document.getElementById('ms'); if (!ms) return;
+  var btn = document.getElementById('ms-btn'), panel = document.getElementById('ms-panel'), value = document.getElementById('ms-value');
+  var boxes = panel.querySelectorAll('input[type="checkbox"]'), other = document.getElementById('ms-other');
+  var wrap = document.getElementById('ms-other-wrap'), text = document.getElementById('ms-other-text');
+  function setOpen(o) { panel.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false'); }
+  btn.addEventListener('click', function () { setOpen(panel.hidden); });
+  document.addEventListener('click', function (e) { if (!panel.hidden && !ms.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
+  function sync(focusOther) {
+    var names = [].filter.call(boxes, function (b) { return b.checked && b !== other; }).map(function (b) { return b.value; });
+    if (other.checked) names.push(text.value.trim() || 'Other');
+    value.textContent = !names.length ? 'Select commodities' : names.length <= 2 ? names.join(', ') : names.length + ' commodities';
+    btn.classList.toggle('has-value', names.length > 0);
+    wrap.hidden = !other.checked; text.required = other.checked;
+    if (focusOther && other.checked) text.focus();
+  }
+  [].forEach.call(boxes, function (b) { b.addEventListener('change', function () { sync(b === other); }); });
+  text.addEventListener('input', function () { sync(false); });
+  ms.closest('form').addEventListener('reset', function () { setTimeout(function () { sync(false); setOpen(false); }, 0); });
+  sync(false);
+})();
+
 /* Edge dividers rise into place once, as they scroll into view */
 (function scaleReveal() {
   var els = document.querySelectorAll('.edge');
