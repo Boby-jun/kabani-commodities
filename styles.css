@@ -853,3 +853,27 @@
     .contact-form .ms-other input { font-family: 'Montserrat', sans-serif; font-size: 15px; width: 100%; background: var(--white); border: 1px solid #8F9792; border-radius: 12px; padding: 13px 15px; min-height: 48px; color: var(--ink); outline: none; }
     .contact-form .ms-other input:focus { border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
     @media (max-width: 720px) { .contact-form .ms-panel { grid-template-columns: 1fr; max-height: 300px; } }
+
+    /* ── Contact form rhythm v3: more air. 8-pt steps: label→field 10, field→field 28, group→group 44, taller fields, wider card ── */
+    @media (min-width: 901px) { .contact-layout { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); } }
+    .contact-form { padding: 48px 48px 44px; gap: 44px; }
+    .contact-form .form-title { margin-bottom: -12px; }
+    .contact-form .form-section { gap: 28px; }
+    .contact-form .form-section + .form-section { padding-top: 44px; }
+    .contact-form .form-row { gap: 24px; }
+    .contact-form .form-group { gap: 10px; }
+    .contact-form .form-group legend { margin-bottom: 16px; }
+    .contact-form .form-group input[type=text], .contact-form .form-group input[type=email], .contact-form .form-group textarea,
+    .contact-form .ms-btn, .contact-form .ms-other input { min-height: 54px; padding: 15px 18px; font-size: 15.5px; border-radius: 14px; }
+    .contact-form .form-group textarea { min-height: 150px; }
+    .contact-form .chip-row { gap: 12px; }
+    .contact-form .ms-other { margin-top: 20px; }
+    .contact-form .ms-panel { top: calc(100% + 8px); padding: 10px; border-radius: 18px; }
+    .contact-form .form-submit { margin-top: 4px; }
+    @media (max-width: 1100px) { .contact-form { padding: 40px 36px 36px; } }
+    @media (max-width: 720px) {
+      .contact-form { padding: 28px 20px 24px; gap: 36px; }
+      .contact-form .form-section { gap: 24px; }
+      .contact-form .form-section + .form-section { padding-top: 36px; }
+      .contact-form .form-row { gap: 24px; }
+    }
