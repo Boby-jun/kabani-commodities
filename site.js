@@ -89,9 +89,27 @@ function handleContactForm(e) {
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
   // start from the visitor's own country when the browser says which it is, otherwise Switzerland
   var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), start = rows.filter(function (r) { return r.iso === region; })[0] || rows.filter(function (r) { return r.iso === 'CH'; })[0];
+  var touched = false;
+  btn.addEventListener('click', function () { touched = true; });
+  document.getElementById('ph').addEventListener('input', function () { touched = true; });
   function reset() { pick(start); }
   reset();
-  wrap.closest('form').addEventListener('reset', function () { setTimeout(function () { reset(); setOpen(false); }, 0); });
+  // then look up the visitor's country from their IP address (one small request; the browser language above is the fallback)
+  function applyCountry(code) {
+    var r = rows.filter(function (x) { return x.iso === String(code).toUpperCase(); })[0];
+    if (r && !touched) pick(r);
+  }
+  var cached = null; try { cached = sessionStorage.getItem('kabani-cc'); } catch (e) { /* storage blocked */ }
+  if (cached) applyCountry(cached);
+  else if (window.fetch) {
+    var ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 3500);
+    fetch('https://api.country.is/', { signal: ctl ? ctl.signal : undefined, credentials: 'omit', referrerPolicy: 'no-referrer' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (j) { if (j && j.country) { try { sessionStorage.setItem('kabani-cc', j.country); } catch (e) { /* ignore */ } applyCountry(j.country); } })
+      .catch(function () { /* offline or blocked: keep the fallback */ })
+      .then(function () { clearTimeout(timer); });
+  }
+  wrap.closest('form').addEventListener('reset', function () { setTimeout(function () { touched = false; var c = null; try { c = sessionStorage.getItem('kabani-cc'); } catch (e) { /* ignore */ } reset(); if (c) applyCountry(c); setOpen(false); }, 0); });
 })();
 
 /* Edge dividers rise into place once, as they scroll into view */
