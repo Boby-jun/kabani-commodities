@@ -786,3 +786,38 @@
     .market-table th.has-slicer .slicer-panel .slicer-opt { font-size: 14px; }
     .admin-wipe { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
     .admin-wipe[hidden] { display: none; }
+
+    /* ── CONTACT FORM polish: readable labels, specific hints, 3:1 field edges, grouped sections, 44 pt touch targets ── */
+    .contact-form { padding: 40px; gap: 30px; }
+    .contact-form .form-title { font-size: 24px; letter-spacing: -0.015em; }
+    .contact-form .form-section { display: flex; flex-direction: column; gap: 20px; }
+    .contact-form .form-section + .form-section { padding-top: 30px; border-top: 1px solid var(--border); }
+    .contact-form .form-row { gap: 18px; }
+    .contact-form .form-group { gap: 8px; }
+    .contact-form .form-group label, .contact-form .form-group legend { font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+    .contact-form .form-group legend { margin-bottom: 10px; float: none; }
+    .contact-form .opt { font-weight: 500; color: var(--ink-soft); margin-left: 6px; font-size: 12.5px; }
+    .contact-form .form-group input[type=text], .contact-form .form-group input[type=email], .contact-form .form-group textarea {
+      font-size: 15px; background: var(--white); border: 1px solid #8F9792; border-radius: 12px; padding: 13px 15px; min-height: 48px;
+    }
+    .contact-form .form-group input:hover, .contact-form .form-group textarea:hover { border-color: var(--ink-soft); }
+    .contact-form .form-group input:focus, .contact-form .form-group textarea:focus { border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .contact-form .form-group input:user-invalid, .contact-form .form-group textarea:user-invalid { border-color: #9B2C1F; box-shadow: 0 0 0 1px #9B2C1F; }
+    .contact-form .form-group input::placeholder, .contact-form .form-group textarea::placeholder { color: #6A716D; }
+    .contact-form .form-group textarea { min-height: 132px; line-height: 1.55; }
+    .contact-form .chip-row { gap: 10px; }
+    .contact-form .chip span { display: inline-flex; align-items: center; gap: 0; min-height: 40px; padding: 8px 18px; font-size: 14px; border-color: #C9CDC6; background: var(--cream-soft); }
+    .contact-form .chip:hover span { border-color: var(--tan); background: var(--white); }
+    .contact-form .chip input:checked + span { background: var(--tan); border-color: var(--tan); color: var(--white); padding-left: 14px; }
+    .contact-form .chip input:checked + span::before {
+      content: ''; width: 14px; height: 14px; margin-right: 7px; flex: none;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .contact-form .form-submit { margin-top: 0; }
+    .contact-form #form-success { font-size: 14.5px; line-height: 1.5; font-weight: 600; color: var(--tan); background: var(--tan-pale); border-radius: 14px; padding: 14px 18px; outline: none; }
+    @media (pointer: coarse) { .contact-form .chip span { min-height: 44px; } }
+    @media (max-width: 720px) {
+      .contact-form { padding: 28px 20px; gap: 26px; }
+      .contact-form .form-row { gap: 20px; }
+      .contact-form .form-submit { align-self: stretch; min-height: 52px; }
+    }

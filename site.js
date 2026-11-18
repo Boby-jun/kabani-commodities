@@ -8,7 +8,8 @@ function closeMenu() {
 }
 function handleContactForm(e) {
   e.preventDefault();
-  document.getElementById('form-success').style.display = 'block';
+  var ok = document.getElementById('form-success');
+  ok.style.display = 'block'; ok.focus({ preventScroll: true }); ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   e.target.reset();
 }
 (function preselectCommodity() {

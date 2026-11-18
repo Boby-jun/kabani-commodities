@@ -299,20 +299,24 @@ def contact():
     <div class="section-inner contact-layout">
       <form class="contact-form" onsubmit="handleContactForm(event)">
         <h2 class="form-title">Send us a message</h2>
-        <div class="form-row">
-          <div class="form-group"><label for="fn">First name</label><input id="fn" type="text" placeholder="Type here" autocomplete="given-name" required /></div>
-          <div class="form-group"><label for="ln">Last name</label><input id="ln" type="text" placeholder="Type here" autocomplete="family-name" required /></div>
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-group"><label for="fn">First name</label><input id="fn" name="first_name" type="text" placeholder="e.g. Maria" autocomplete="given-name" required /></div>
+            <div class="form-group"><label for="ln">Last name</label><input id="ln" name="last_name" type="text" placeholder="e.g. Keller" autocomplete="family-name" required /></div>
+          </div>
+          <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
+          <div class="form-row">
+            <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
+            <div class="form-group"><label for="ct">Country <span class="opt">optional</span></label><input id="ct" name="country" type="text" placeholder="e.g. Switzerland" autocomplete="country-name" /></div>
+          </div>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label for="em">Email</label><input id="em" type="email" placeholder="Type here" autocomplete="email" required /></div>
-          <div class="form-group"><label for="co">Company</label><input id="co" type="text" placeholder="Type here" autocomplete="organization" /></div>
+        <div class="form-section">
+          <fieldset class="form-group"><legend>I am a <span class="opt">optional</span></legend><div class="chip-row">{roles}</div></fieldset>
+          <fieldset class="form-group"><legend>Commodities of interest <span class="opt">optional</span></legend><div class="chip-row">{chips}</div></fieldset>
+          <div class="form-group"><label for="msg">Your requirement <span class="opt">optional</span></label><textarea id="msg" name="requirement" rows="5" placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
         </div>
-        <div class="form-group"><label for="ct">Country</label><input id="ct" type="text" placeholder="Type here" autocomplete="country-name" /></div>
-        <fieldset class="form-group"><legend>I am a…</legend><div class="chip-row">{roles}</div></fieldset>
-        <fieldset class="form-group"><legend>Commodities of interest</legend><div class="chip-row">{chips}</div></fieldset>
-        <div class="form-group"><label for="msg">Your requirement</label><textarea id="msg" placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
         <button type="submit" class="form-submit">Send message</button>
-        <div id="form-success" role="status" style="display:none">Thank you. We'll be in touch within 24 hours.</div>
+        <div id="form-success" role="status" tabindex="-1" style="display:none">Thank you. We'll be in touch within 24 hours.</div>
       </form>
       <aside class="contact-aside">
         <h2>Geneva, Switzerland</h2>
