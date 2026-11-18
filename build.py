@@ -284,10 +284,13 @@ _ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.
 _ICON_MAIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7.5 8 6 8-6"/></svg>'
 _ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3.4l1.6 4-2 1.3a11 11 0 0 0 6.7 6.7l1.3-2 4 1.6V19a1.8 1.8 0 0 1-2 1.8A15.6 15.6 0 0 1 3.2 6 1.8 1.8 0 0 1 5 4Z"/></svg>'
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import phone_codes
+
 def contact():
     chips = "".join(f'<label class="ms-opt"><input type="checkbox" name="commodity" value="{E(c["name"])}" /><span>{E(c["name"])}</span></label>' for c in ITEMS)
     chips += '<label class="ms-opt"><input type="checkbox" name="commodity" value="Other" id="ms-other" /><span>Other</span></label>'
-    roles = "".join(f'<label class="chip"><input type="radio" name="role" value="{r}" /><span>{r}</span></label>' for r in ("Buyer", "Supplier", "Both"))
+    roles = "".join(f'<label class="chip"><input type="radio" name="role" value="{r}" required /><span>{r}</span></label>' for r in ("Buyer", "Supplier", "Both"))
     return head("Get in touch — Kabani Commodities", "Contact Kabani Commodities about buying or selling a commodity.") + nav("contact") + f"""
   <header class="contact-banner">
     <div class="section-inner">
@@ -306,22 +309,38 @@ def contact():
           </div>
           <div class="form-row">
             <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
-            <div class="form-group"><label for="co">Company <span class="opt">optional</span></label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" /></div>
+            <div class="form-group"><label for="co">Company</label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" required /></div>
+          </div>
+          <div class="form-group">
+            <label for="ph">Phone number</label>
+            <div class="phone">
+              <div class="cc" id="cc">
+                <button type="button" class="cc-btn" id="cc-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Country code"><span class="cc-flag" id="cc-flag" aria-hidden="true"></span><span class="cc-dial" id="cc-dial">+41</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                <div class="cc-panel" id="cc-panel" hidden>
+                  <input type="search" id="cc-search" class="cc-search" placeholder="Search country or code" aria-label="Search country or code" autocomplete="off" />
+                  <ul class="cc-list" id="cc-list" role="listbox" aria-label="Country codes"></ul>
+                </div>
+              </div>
+              <input id="ph" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="79 123 45 67" required />
+              <input type="hidden" name="phone_code" id="cc-value" value="+41" />
+            </div>
+            <script type="application/json" id="cc-data">{json.dumps(phone_codes.rows(), ensure_ascii=False)}</script>
           </div>
         </div>
         <div class="form-section">
           <div class="form-row form-row-top">
-          <fieldset class="form-group"><legend>I am a <span class="opt">optional</span></legend><div class="chip-row">{roles}</div></fieldset>
+          <fieldset class="form-group"><legend>I am a</legend><div class="chip-row">{roles}</div></fieldset>
           <div class="form-group">
-            <span class="ms-label" id="ms-label">Commodities of interest <span class="opt">optional</span></span>
+            <span class="ms-label" id="ms-label">Commodities of interest</span>
             <div class="ms" id="ms">
               <button type="button" class="ms-btn" id="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-label ms-value"><span class="ms-value" id="ms-value">Select commodities</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              <input class="ms-proxy" id="ms-proxy" tabindex="-1" aria-hidden="true" required />
               <div class="ms-panel" id="ms-panel" role="group" aria-label="Commodities of interest" hidden>{chips}</div>
             </div>
             <div class="ms-other" id="ms-other-wrap" hidden><label for="ms-other-text">Which commodity?</label><input id="ms-other-text" name="other_commodity" type="text" maxlength="120" placeholder="e.g. Cocoa, cashew, maize" autocomplete="off" /></div>
           </div>
           </div>
-          <div class="form-group"><label for="msg">Your requirement <span class="opt">optional</span></label><textarea id="msg" name="requirement" rows="5" placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
+          <div class="form-group"><label for="msg">Your requirement</label><textarea id="msg" name="requirement" rows="5" required placeholder="Volume, specification, timeline, origin or destination…"></textarea></div>
         </div>
         <button type="submit" class="form-submit">Send message</button>
         <div id="form-success" role="status" tabindex="-1" style="display:none">Thank you. We'll be in touch within 24 hours.</div>

@@ -41,6 +41,7 @@ function handleContactForm(e) {
     if (other.checked) names.push(text.value.trim() || 'Other');
     value.textContent = !names.length ? 'Select commodities' : names.length <= 2 ? names.join(', ') : names.length + ' commodities';
     btn.classList.toggle('has-value', names.length > 0);
+    var proxy = document.getElementById('ms-proxy'); if (proxy) proxy.value = names.join(', ');
     wrap.hidden = !other.checked; text.required = other.checked;
     if (focusOther && other.checked) text.focus();
   }
@@ -48,6 +49,49 @@ function handleContactForm(e) {
   text.addEventListener('input', function () { sync(false); });
   ms.closest('form').addEventListener('reset', function () { setTimeout(function () { sync(false); setOpen(false); }, 0); });
   sync(false);
+})();
+
+/* Contact form: phone number with a searchable country-code list (flag, name, code) */
+(function phoneField() {
+  var dataEl = document.getElementById('cc-data'); if (!dataEl) return;
+  var rows = JSON.parse(dataEl.textContent), btn = document.getElementById('cc-btn'), panel = document.getElementById('cc-panel');
+  var search = document.getElementById('cc-search'), list = document.getElementById('cc-list'), flagEl = document.getElementById('cc-flag');
+  var dialEl = document.getElementById('cc-dial'), hidden = document.getElementById('cc-value'), wrap = document.getElementById('cc');
+  function flag(iso) { return iso.length === 2 && iso !== 'XK' ? String.fromCodePoint(127397 + iso.charCodeAt(0), 127397 + iso.charCodeAt(1)) : '\uD83C\uDFF3\uFE0F'; }
+  function pick(r) { flagEl.textContent = flag(r.iso); dialEl.textContent = r.dial; hidden.value = r.dial; btn.setAttribute('aria-label', 'Country code: ' + r.name + ' ' + r.dial); mark(r.iso); }
+  var items = rows.map(function (r) {
+    var li = document.createElement('li'); li.setAttribute('role', 'presentation');
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'cc-opt'; b.setAttribute('role', 'option'); b.setAttribute('data-iso', r.iso);
+    b.innerHTML = '<span class="cc-flag" aria-hidden="true">' + flag(r.iso) + '</span><span class="cc-name"></span><span class="cc-code"></span>';
+    b.querySelector('.cc-name').textContent = r.name; b.querySelector('.cc-code').textContent = r.dial;
+    b.addEventListener('click', function () { pick(r); setOpen(false); btn.focus(); });
+    li.appendChild(b); list.appendChild(li); return { r: r, li: li, b: b, key: (r.name + ' ' + r.dial + ' ' + r.dial.slice(1) + ' ' + r.iso).toLowerCase() };
+  });
+  function mark(iso) { items.forEach(function (it) { it.b.setAttribute('aria-selected', it.r.iso === iso ? 'true' : 'false'); }); }
+  function setOpen(o) {
+    panel.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false');
+    if (o) { search.value = ''; filter(); search.focus(); var cur = list.querySelector('[aria-selected="true"]'); if (cur) cur.scrollIntoView({ block: 'center' }); }
+  }
+  function filter() {
+    var q = search.value.trim().toLowerCase().replace(/^\+/, '');
+    items.forEach(function (it) { it.li.hidden = q && it.key.indexOf(q) < 0; });
+  }
+  function visible() { return items.filter(function (it) { return !it.li.hidden; }); }
+  btn.addEventListener('click', function () { setOpen(panel.hidden); });
+  search.addEventListener('input', filter);
+  search.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown') { var v = visible(); if (v.length) { v[0].b.focus(); e.preventDefault(); } } if (e.key === 'Enter') { var v2 = visible(); if (v2.length) { v2[0].b.click(); e.preventDefault(); } } });
+  list.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var v = visible(), i = v.map(function (x) { return x.b; }).indexOf(document.activeElement); if (i < 0) return;
+    var n = v[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (n) n.b.focus(); else if (e.key === 'ArrowUp') search.focus(); e.preventDefault();
+  });
+  document.addEventListener('click', function (e) { if (!panel.hidden && !wrap.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
+  // start from the visitor's own country when the browser says which it is, otherwise Switzerland
+  var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), start = rows.filter(function (r) { return r.iso === region; })[0] || rows.filter(function (r) { return r.iso === 'CH'; })[0];
+  function reset() { pick(start); }
+  reset();
+  wrap.closest('form').addEventListener('reset', function () { setTimeout(function () { reset(); setOpen(false); }, 0); });
 })();
 
 /* Edge dividers rise into place once, as they scroll into view */

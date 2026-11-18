@@ -886,3 +886,34 @@
     .contact-form .form-row-top .chip-row { gap: 10px; }
     @media (max-width: 900px) { .contact-banner { padding: 56px 0 190px; } .contact-layout { margin-top: -130px; } }
     @media (max-width: 720px) { .contact-form .ms-panel { left: 0; right: 0; width: auto; } .contact-banner { padding: 48px 0 170px; } .contact-layout { margin-top: -120px; } }
+
+    /* ── Phone field: country-code dropdown + number ── */
+    .contact-form .phone { display: flex; gap: 10px; align-items: stretch; }
+    .contact-form .phone > input[type=tel] { flex: 1 1 auto; min-width: 0; font-family: 'Montserrat', sans-serif; font-size: 15.5px; color: var(--ink); background: var(--white); border: 1px solid #8F9792; border-radius: 14px; padding: 15px 18px; min-height: 54px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .contact-form .phone > input[type=tel]:hover { border-color: var(--ink-soft); }
+    .contact-form .phone > input[type=tel]:focus { border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .contact-form .phone > input[type=tel]::placeholder { color: #6A716D; }
+    .contact-form .cc { position: relative; flex: none; }
+    .contact-form .cc-btn { height: 100%; min-height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 16px; cursor: pointer; font: 600 15.5px 'Montserrat', sans-serif; color: var(--ink); background: var(--white); border: 1px solid #8F9792; border-radius: 14px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .contact-form .cc-btn:hover { border-color: var(--ink-soft); }
+    .contact-form .cc-btn:focus-visible, .contact-form .cc-btn[aria-expanded="true"] { outline: none; border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .contact-form .cc-btn svg { width: 16px; height: 16px; fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .contact-form .cc-flag { font-size: 22px; line-height: 1; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }
+    .contact-form .cc-panel { position: absolute; left: 0; top: calc(100% + 8px); z-index: 40; width: min(380px, calc(100vw - 48px)); background: var(--white); border: 1px solid var(--border); border-radius: 18px; padding: 10px; box-shadow: 0 2px 6px rgba(26,31,33,0.06), 0 22px 44px -14px rgba(26,31,33,0.22); }
+    .contact-form .cc-panel[hidden] { display: none; }
+    .contact-form .cc-search { width: 100%; font: 500 15px 'Montserrat', sans-serif; color: var(--ink); background: var(--cream-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-height: 46px; outline: none; margin-bottom: 8px; }
+    .contact-form .cc-search:focus { border-color: var(--tan); background: var(--white); box-shadow: 0 0 0 3px var(--tan-pale); }
+    .contact-form .cc-list { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow: auto; }
+    .contact-form .cc-list li[hidden] { display: none; }
+    .contact-form .cc-opt { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 10px; background: none; cursor: pointer; text-align: left; font: 500 14.5px 'Montserrat', sans-serif; color: var(--ink); }
+    .contact-form .cc-opt:hover, .contact-form .cc-opt:focus-visible { background: var(--cream-soft); outline: none; }
+    .contact-form .cc-opt[aria-selected="true"] { background: var(--tan-pale); font-weight: 600; }
+    .contact-form .cc-name { flex: 1 1 auto; min-width: 0; }
+    .contact-form .cc-code { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .contact-form .ms-proxy { position: absolute; left: 0; bottom: 0; width: 100%; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+
+    /* Photo runs down behind the form card to about its middle */
+    @media (min-width: 901px) {
+      .contact-banner { padding: 84px 0 540px; }
+      .contact-layout { margin-top: -472px; }
+    }
