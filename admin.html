@@ -12,7 +12,7 @@
   <link rel="icon" href="favicon.ico" sizes="48x48" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <link rel="stylesheet" href="styles.css?v=1b1162b2" />
+  <link rel="stylesheet" href="styles.css?v=28fa1736" />
 </head>
 <body>
 
@@ -49,7 +49,23 @@
         <div class="seg" role="tablist" aria-label="Supply or demand">
           <button type="button" role="tab" id="atab-supply" aria-selected="true">Supply <span id="count-supply">0</span></button>
           <button type="button" role="tab" id="atab-demand" aria-selected="false" tabindex="-1">Demand <span id="count-demand">0</span></button>
+          <button type="button" role="tab" id="atab-requests" aria-selected="false" tabindex="-1">Requests <span id="count-requests" class="req-badge">0</span></button>
         </div>
+        <section id="admin-requests-view" hidden>
+          <div class="admin-req-head">
+            <h2>Requests from visitors</h2>
+            <div class="seg seg-sm" id="req-filter" role="group" aria-label="Show requests">
+              <button type="button" data-status="pending" aria-pressed="true">Pending <span id="rc-pending">0</span></button>
+              <button type="button" data-status="accepted" aria-pressed="false">Accepted <span id="rc-accepted">0</span></button>
+              <button type="button" data-status="rejected" aria-pressed="false">Rejected <span id="rc-rejected">0</span></button>
+            </div>
+          </div>
+          <p class="admin-lead" id="req-lead">Supply offers and purchase requests sent from the Commodities page. Contact the person to confirm the details, then accept or reject. Accepting adds it to the supply or demand list and the map.</p>
+          <div id="req-list" class="req-list"></div>
+          <p class="market-empty" id="req-empty" hidden></p>
+          <p class="admin-error" id="req-error" role="alert" hidden></p>
+        </section>
+        <div id="admin-listings-view">
         <div class="admin-import" id="admin-import" hidden>
           <p>No live listings yet. Start from the supply list on the map?</p>
           <button type="button" class="row-go" id="admin-import-btn">Import current listings</button>
@@ -87,11 +103,12 @@
         </table></div>
         <p class="market-empty" id="admin-empty" hidden></p>
         <p class="admin-wipe" id="admin-wipe-row" hidden><button type="button" class="panel-showall admin-del" id="admin-wipe">Delete all listings</button> <span>Removes every supply and demand listing at once. This cannot be undone.</span></p>
+        </div>
       </div>
     </div>
   </main>
   <script type="application/json" id="admin-data">{"commodities": [{"slug": "coffee", "name": "Coffee", "hint": "For example Arabica AA, screen 17+"}, {"slug": "tea", "name": "Tea", "hint": "For example BP1 black tea, CTC"}, {"slug": "avocado", "name": "Avocado", "hint": "For example Hass, size 18 to 22"}, {"slug": "macadamia", "name": "Macadamia", "hint": "For example kernel style 1, or in shell"}, {"slug": "flowers", "name": "Flowers", "hint": "For example roses, 50 cm stems, grade A"}, {"slug": "poultry", "name": "Poultry", "hint": "For example whole frozen chicken, halal"}, {"slug": "urea", "name": "Urea", "hint": "For example 46% nitrogen, granular"}, {"slug": "biochar", "name": "Biochar", "hint": "For example fixed carbon %, particle size"}, {"slug": "sulphur", "name": "Sulphur", "hint": "For example 99.9% purity, granular"}, {"slug": "oil", "name": "Oil", "hint": "For example grade, API gravity, sulphur content"}, {"slug": "copper", "name": "Copper", "hint": "For example cathode grade A, 99.99%"}, {"slug": "iron", "name": "Iron", "hint": "For example ore 62% Fe, fines"}], "countries": ["Afghanistan", "Albania", "Algeria", "Angola", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bangladesh", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herz.", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Central African Rep.", "Chad", "Chile", "China", "Colombia", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia", "C\u00f4te d'Ivoire", "Dem. Rep. Congo", "Denmark", "Djibouti", "Dominican Rep.", "Ecuador", "Egypt", "El Salvador", "Eq. Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Is.", "Fiji", "Finland", "Fr. S. Antarctic Lands", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Greenland", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Mali", "Mauritania", "Mexico", "Moldova", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "N. Cyprus", "Namibia", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "S. Sudan", "Saudi Arabia", "Senegal", "Serbia", "Sierra Leone", "Slovakia", "Slovenia", "Solomon Is.", "Somalia", "Somaliland", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "W. Sahara", "Yemen", "Zambia", "Zimbabwe", "eSwatini"], "seed": {"supply": [], "demand": []}, "topics": [{"id": "agro", "name": "Agro products", "slugs": ["coffee", "tea", "avocado", "macadamia", "flowers"]}, {"id": "livestock", "name": "Livestock", "slugs": ["poultry"]}, {"id": "fertilisers", "name": "Fertilisers", "slugs": ["urea", "biochar"]}, {"id": "energy", "name": "Oil & energy", "slugs": ["oil"]}, {"id": "metals", "name": "Metals & minerals", "slugs": ["copper", "iron", "sulphur"]}]}</script>
-  <script src="firebase-config.js?v=79525a61"></script>
-  <script type="module" src="admin.js?v=885582d1"></script>
+  <script src="firebase-config.js?v=265e529c"></script>
+  <script type="module" src="admin.js?v=2a859eff"></script>
 </body>
 </html>

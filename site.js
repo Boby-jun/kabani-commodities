@@ -51,53 +51,56 @@ function handleContactForm(e) {
   sync(false);
 })();
 
-/* Contact form: phone number with a searchable country-code list (flag, name, code) */
-(function phoneField() {
-  var dataEl = document.getElementById('cc-data'); if (!dataEl) return;
-  var rows = JSON.parse(dataEl.textContent), btn = document.getElementById('cc-btn'), panel = document.getElementById('cc-panel');
-  var search = document.getElementById('cc-search'), list = document.getElementById('cc-list'), flagEl = document.getElementById('cc-flag');
-  var dialEl = document.getElementById('cc-dial'), hidden = document.getElementById('cc-value'), wrap = document.getElementById('cc');
-  function flag(iso) { return iso.length === 2 && iso !== 'XK' ? String.fromCodePoint(127397 + iso.charCodeAt(0), 127397 + iso.charCodeAt(1)) : '\uD83C\uDFF3\uFE0F'; }
-  function pick(r) { flagEl.textContent = flag(r.iso); dialEl.textContent = r.dial; hidden.value = r.dial; btn.setAttribute('aria-label', 'Country code: ' + r.name + ' ' + r.dial); mark(r.iso); }
-  var items = rows.map(function (r) {
-    var li = document.createElement('li'); li.setAttribute('role', 'presentation');
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'cc-opt'; b.setAttribute('role', 'option'); b.setAttribute('data-iso', r.iso);
-    b.innerHTML = '<span class="cc-flag" aria-hidden="true">' + flag(r.iso) + '</span><span class="cc-name"></span><span class="cc-code"></span>';
-    b.querySelector('.cc-name').textContent = r.name; b.querySelector('.cc-code').textContent = r.dial;
-    b.addEventListener('click', function () { pick(r); setOpen(false); btn.focus(); });
-    li.appendChild(b); list.appendChild(li); return { r: r, li: li, b: b, key: (r.name + ' ' + r.dial + ' ' + r.dial.slice(1) + ' ' + r.iso).toLowerCase() };
+/* Phone number with a searchable country-code list (flag, name, code). Works for every .phone[data-phone] on the page. */
+(function phoneFields() {
+  var dataEl = document.getElementById('cc-data'), roots = document.querySelectorAll('[data-phone]');
+  if (!dataEl || !roots.length) return;
+  var rows = JSON.parse(dataEl.textContent), fields = [];
+  function flag(iso) { return iso.length === 2 && iso !== 'XK' ? String.fromCodePoint(127397 + iso.charCodeAt(0), 127397 + iso.charCodeAt(1)) : '🏳️'; }
+  var region = ((navigator.language || '').split('-')[1] || '').toUpperCase();
+  function byIso(c) { return rows.filter(function (x) { return x.iso === String(c).toUpperCase(); })[0]; }
+  var start = byIso(region) || byIso('CH');
+
+  [].forEach.call(roots, function (root) {
+    var btn = root.querySelector('.cc-btn'), panel = root.querySelector('.cc-panel'), search = root.querySelector('.cc-search'), list = root.querySelector('.cc-list');
+    var flagEl = root.querySelector('.cc-flag'), dialEl = root.querySelector('.cc-dial'), hidden = root.querySelector('.cc-value'), wrap = root.querySelector('.cc'), input = root.querySelector('.ph-input');
+    var touched = false;
+    function mark(iso) { items.forEach(function (it) { it.b.setAttribute('aria-selected', it.r.iso === iso ? 'true' : 'false'); }); }
+    function pick(r) { flagEl.textContent = flag(r.iso); dialEl.textContent = r.dial; hidden.value = r.dial; btn.setAttribute('aria-label', 'Country code: ' + r.name + ' ' + r.dial); mark(r.iso); }
+    function setOpen(o) {
+      panel.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false');
+      if (o) { search.value = ''; filter(); search.focus(); var cur = list.querySelector('[aria-selected="true"]'); if (cur) cur.scrollIntoView({ block: 'center' }); }
+    }
+    var items = rows.map(function (r) {
+      var li = document.createElement('li'); li.setAttribute('role', 'presentation');
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'cc-opt'; b.setAttribute('role', 'option'); b.setAttribute('data-iso', r.iso);
+      b.innerHTML = '<span class="cc-flag" aria-hidden="true">' + flag(r.iso) + '</span><span class="cc-name"></span><span class="cc-code"></span>';
+      b.querySelector('.cc-name').textContent = r.name; b.querySelector('.cc-code').textContent = r.dial;
+      b.addEventListener('click', function () { touched = true; pick(r); setOpen(false); btn.focus(); });
+      li.appendChild(b); list.appendChild(li); return { r: r, li: li, b: b, key: (r.name + ' ' + r.dial + ' ' + r.dial.slice(1) + ' ' + r.iso).toLowerCase() };
+    });
+    function filter() { var q = search.value.trim().toLowerCase().replace(/^\+/, ''); items.forEach(function (it) { it.li.hidden = q && it.key.indexOf(q) < 0; }); }
+    function visible() { return items.filter(function (it) { return !it.li.hidden; }); }
+    btn.addEventListener('click', function () { touched = true; setOpen(panel.hidden); });
+    input.addEventListener('input', function () { touched = true; });
+    search.addEventListener('input', filter);
+    search.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown') { var v = visible(); if (v.length) { v[0].b.focus(); e.preventDefault(); } } if (e.key === 'Enter') { var v2 = visible(); if (v2.length) { v2[0].b.click(); e.preventDefault(); } } });
+    list.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      var v = visible(), i = v.map(function (x) { return x.b; }).indexOf(document.activeElement); if (i < 0) return;
+      var n = v[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (n) n.b.focus(); else if (e.key === 'ArrowUp') search.focus(); e.preventDefault();
+    });
+    document.addEventListener('click', function (e) { if (!panel.hidden && !wrap.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
+    var f = { pick: pick, isTouched: function () { return touched; }, reset: function () { touched = false; setOpen(false); pick(f.country || start); } };
+    fields.push(f); pick(start);
+    var form = root.closest('form'); if (form) form.addEventListener('reset', function () { setTimeout(f.reset, 0); });
   });
-  function mark(iso) { items.forEach(function (it) { it.b.setAttribute('aria-selected', it.r.iso === iso ? 'true' : 'false'); }); }
-  function setOpen(o) {
-    panel.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false');
-    if (o) { search.value = ''; filter(); search.focus(); var cur = list.querySelector('[aria-selected="true"]'); if (cur) cur.scrollIntoView({ block: 'center' }); }
-  }
-  function filter() {
-    var q = search.value.trim().toLowerCase().replace(/^\+/, '');
-    items.forEach(function (it) { it.li.hidden = q && it.key.indexOf(q) < 0; });
-  }
-  function visible() { return items.filter(function (it) { return !it.li.hidden; }); }
-  btn.addEventListener('click', function () { setOpen(panel.hidden); });
-  search.addEventListener('input', filter);
-  search.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown') { var v = visible(); if (v.length) { v[0].b.focus(); e.preventDefault(); } } if (e.key === 'Enter') { var v2 = visible(); if (v2.length) { v2[0].b.click(); e.preventDefault(); } } });
-  list.addEventListener('keydown', function (e) {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    var v = visible(), i = v.map(function (x) { return x.b; }).indexOf(document.activeElement); if (i < 0) return;
-    var n = v[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (n) n.b.focus(); else if (e.key === 'ArrowUp') search.focus(); e.preventDefault();
-  });
-  document.addEventListener('click', function (e) { if (!panel.hidden && !wrap.contains(e.target)) setOpen(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
-  // start from the visitor's own country when the browser says which it is, otherwise Switzerland
-  var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), start = rows.filter(function (r) { return r.iso === region; })[0] || rows.filter(function (r) { return r.iso === 'CH'; })[0];
-  var touched = false;
-  btn.addEventListener('click', function () { touched = true; });
-  document.getElementById('ph').addEventListener('input', function () { touched = true; });
-  function reset() { pick(start); }
-  reset();
+
   // then look up the visitor's country from their IP address (one small request; the browser language above is the fallback)
   function applyCountry(code) {
-    var r = rows.filter(function (x) { return x.iso === String(code).toUpperCase(); })[0];
-    if (r && !touched) pick(r);
+    var r = byIso(code); if (!r) return;
+    fields.forEach(function (f) { f.country = r; if (!f.isTouched()) f.pick(r); });
   }
   var cached = null; try { cached = sessionStorage.getItem('kabani-cc'); } catch (e) { /* storage blocked */ }
   if (cached) applyCountry(cached);
@@ -109,7 +112,45 @@ function handleContactForm(e) {
       .catch(function () { /* offline or blocked: keep the fallback */ })
       .then(function () { clearTimeout(timer); });
   }
-  wrap.closest('form').addEventListener('reset', function () { setTimeout(function () { touched = false; var c = null; try { c = sessionStorage.getItem('kabani-cc'); } catch (e) { /* ignore */ } reset(); if (c) applyCountry(c); setOpen(false); }, 0); });
+})();
+
+/* Commodities page, "Make a request": saves a supply offer or a purchase request for review (and emails it when a notify address is set up). */
+(function requestForm() {
+  var form = document.getElementById('request-form'); if (!form) return;
+  var cfg = window.KABANI_FIREBASE || {}, err = document.getElementById('rq-error'), ok = document.getElementById('rq-success');
+  var commodity = document.getElementById('rq-commodity'), otherWrap = document.getElementById('rq-other-wrap'), other = document.getElementById('rq-other');
+  var destWrap = document.getElementById('rq-dest-wrap'), originL = document.getElementById('rq-origin-l');
+  function kind() { var c = form.querySelector('input[name="kind"]:checked'); return c ? c.value : ''; }
+  function sync() {
+    var isOther = commodity.value === 'other'; otherWrap.hidden = !isOther; other.required = isOther;
+    var buy = kind() === 'demand'; destWrap.hidden = !buy; originL.textContent = buy ? 'Preferred country of origin (or Any)' : 'Country of origin';
+  }
+  commodity.addEventListener('change', sync);
+  [].forEach.call(form.querySelectorAll('input[name="kind"]'), function (r) { r.addEventListener('change', sync); });
+  form.addEventListener('reset', function () { setTimeout(sync, 0); });
+  function say(msg) { err.textContent = msg || ''; err.hidden = !msg; }
+  function str(v) { return { stringValue: String(v == null ? '' : v).trim() }; }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); say('');
+    if (form.elements.website && form.elements.website.value) { ok.hidden = false; return; } // honeypot: pretend success to bots
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    if (!cfg.projectId || !cfg.apiKey) { say('Requests are not switched on yet. Please use the contact form.'); return; }
+    var v = function (n) { return form.elements[n] ? form.elements[n].value.trim() : ''; };
+    var data = { kind: kind(), commodity: v('commodity'), otherCommodity: v('other_commodity'), origin: v('origin'), volume: v('volume'), quality: v('quality'), when: v('when'),
+      destination: v('destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
+    var fields = {}; Object.keys(data).forEach(function (k) { fields[k] = str(data[k]); });
+    fields.status = str('pending'); fields.createdAt = { timestampValue: new Date().toISOString() };
+    var btn = form.querySelector('.form-submit'); btn.disabled = true;
+    fetch('https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(cfg.projectId) + '/databases/(default)/documents/submissions?key=' + encodeURIComponent(cfg.apiKey),
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: fields }), credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error('save failed'); return r.json(); })
+      .then(function () {
+        if (cfg.notifyUrl) { try { fetch(cfg.notifyUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(Object.assign({ _subject: 'New ' + (data.kind === 'supply' ? 'supply offer' : 'purchase request') + ': ' + (data.commodity === 'other' ? data.otherCommodity : data.commodity) }, data)) }); } catch (x) { /* the request is saved either way */ } }
+        form.reset(); ok.hidden = false; ok.focus({ preventScroll: true }); ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      })
+      .catch(function () { say('We could not send your request just now. Please try again, or use the contact form.'); })
+      .then(function () { btn.disabled = false; });
+  });
 })();
 
 /* Edge dividers rise into place once, as they scroll into view */
@@ -339,7 +380,7 @@ var MarketFilter = (function () {
       n.focus(); show(n.id.replace('tab-', '')); e.preventDefault();
     });
   });
-  if (location.hash === '#demand' || location.hash === '#map') show(location.hash.slice(1));
+  if (location.hash === '#demand' || location.hash === '#map' || location.hash === '#request') show(location.hash.slice(1));
 
   /* --- commodity slicer --- */
   var btn = document.getElementById('slicer-btn'), panel = document.getElementById('slicer-panel'), clearBtn = document.getElementById('slicer-clear');
@@ -475,6 +516,7 @@ var MarketFilter = (function () {
   var mq = window.matchMedia('(max-width: 720px)');
   window.__placeSlicers = function () {
     var tab = window.__currentTab ? window.__currentTab() : 'supply';
+    tools.hidden = tab === 'request';
     var panelEl = document.getElementById('panel-' + tab);
     var inHeads = tab !== 'map' && !mq.matches && panelEl;
     var wraps = { commodity: first.closest('.slicer') };

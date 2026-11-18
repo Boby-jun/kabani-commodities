@@ -25,10 +25,14 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const isoDay = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); // local date, as typed in the browser
 const fmtAdded = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? (+m[3]) + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1] : '—'; };
 
-let store = null, listings = [], tab = 'supply', editing = null;
+let store = null, listings = [], requests = [], tab = 'supply', editing = null, reqFilter = 'pending';
 const picked = new Set(); // commodity slicer: nothing ticked shows everything
 
 /* ---------- data layers ---------- */
+const REQ_SAMPLE = [
+  { kind: 'demand', commodity: 'coffee', otherCommodity: '', origin: 'Ethiopia', volume: '2 containers', quality: 'Arabica, specialty grade', when: 'Q1 2027', destination: 'Rotterdam, Netherlands', details: 'Samples must be approved before contract.', name: 'Maria Keller', company: 'Keller Roasters AG', email: 'maria@example.com', phone: '+41 79 123 45 67', status: 'pending', createdAt: new Date(Date.now() - 36e5 * 5) },
+  { kind: 'supply', commodity: 'other', otherCommodity: 'Cashew nuts', origin: 'Tanzania', volume: '1 container weekly', quality: 'W320 kernels', when: 'Flexible', destination: '', details: 'Packed in 22.68 kg cartons.', name: 'Joseph Mwangi', company: 'Mwangi Agro Ltd', email: 'joseph@example.com', phone: '+255 712 345 678', status: 'pending', createdAt: new Date(Date.now() - 36e5 * 30) },
+];
 const SAMPLE = [
   { type: 'supply', commodity: 'coffee', origin: 'Kenya', volume: '40 t per month', quality: 'Arabica AA, screen 17+', when: 'October to December', details: 'Washed, FAQ grade. Cupping samples can be sent on request.' },
   { type: 'supply', commodity: 'tea', origin: 'Kenya', volume: '2 containers per month', quality: 'BP1 black tea', when: 'Flexible', details: 'Orthodox and CTC available. Packed in paper sacks.' },
@@ -63,6 +67,7 @@ function demoStore() {
   try { rows = JSON.parse(sessionStorage.getItem('kabani-demo') || 'null') || []; } catch (e) { /* storage blocked */ }
   if (!rows.length) rows = SAMPLE.map((r, i) => ({ ...r, added: isoDay(new Date(Date.now() - [0, 3, 9, 1, 20][i] * 864e5)), id: 'd' + (++seq) }));
   seq = rows.length + 100;
+  let reqs = REQ_SAMPLE.map((r, i) => ({ ...r, id: 'q' + i }));
   const keep = () => { try { sessionStorage.setItem('kabani-demo', JSON.stringify(rows)); } catch (e) { /* ignore */ } };
   return {
     live: false,
@@ -70,6 +75,8 @@ function demoStore() {
     async save(id, payload) { if (id) rows = rows.map((r) => (r.id === id ? { ...payload, id } : r)); else rows.push({ ...payload, id: 'd' + (++seq) }); keep(); },
     async remove(id) { rows = rows.filter((r) => r.id !== id); keep(); },
     async removeAll() { rows = []; keep(); },
+    async loadRequests() { return reqs.map((r) => ({ ...r })); },
+    async decide(id, status, listing) { if (listing) rows.push({ ...listing, id: 'd' + (++seq) }); reqs = reqs.map((r) => (r.id === id ? { ...r, status } : r)); keep(); },
     async importSeed() { /* not needed in preview */ },
   };
 }
@@ -94,6 +101,11 @@ async function firebaseStore(onUser) {
     async load() { const snap = await F.getDocs(F.collection(db, 'listings')); return snap.docs.map((d) => ({ id: d.id, ...d.data() })); },
     async save(id, payload) { if (id) await F.setDoc(F.doc(db, 'listings', id), payload); else await F.addDoc(F.collection(db, 'listings'), payload); await markLive(); },
     async remove(id) { await F.deleteDoc(F.doc(db, 'listings', id)); await markLive(); },
+    async loadRequests() { const snap = await F.getDocs(F.collection(db, 'submissions')); return snap.docs.map((d) => { const x = d.data(); return { id: d.id, ...x, createdAt: x.createdAt && x.createdAt.toDate ? x.createdAt.toDate() : null }; }); },
+    async decide(id, status, listing) {
+      if (listing) { await F.addDoc(F.collection(db, 'listings'), listing); await markLive(); }
+      await F.updateDoc(F.doc(db, 'submissions', id), { status, decidedAt: F.serverTimestamp() });
+    },
     async removeAll() {
       const snap = await F.getDocs(F.collection(db, 'listings'));
       for (let i = 0; i < snap.docs.length; i += 400) { const b = F.writeBatch(db); snap.docs.slice(i, i + 400).forEach((d) => b.delete(d.ref)); await b.commit(); }
@@ -125,12 +137,15 @@ function button(label, cls, fn) {
 
 async function load() {
   listings = await store.load();
+  try { requests = await store.loadRequests(); } catch (e) { requests = []; $('req-error').textContent = 'Requests could not be loaded yet (' + (e.code || e.message) + '). If this says permission-denied, publish the updated firestore.rules in Firebase.'; $('req-error').hidden = false; }
   $('admin-import').hidden = !store.live || listings.length > 0 || !(data.seed.supply.length + data.seed.demand.length) || sessionStorage.getItem('kabani-live') === '1';
   render();
 }
 
 function render() {
   for (const t of ['supply', 'demand']) $('count-' + t).textContent = listings.filter((l) => l.type === t).length;
+  renderRequestBadge();
+  if (tab === 'requests') { renderRequests(); return; }
   const isDemand = tab === 'demand';
   const all = listings.filter((l) => l.type === tab);
   const rows = all.filter((l) => !picked.size || picked.has(l.commodity)).sort((a, b) => (order[a.commodity] ?? 99) - (order[b.commodity] ?? 99) || (a.origin || '').localeCompare(b.origin || ''));
@@ -180,11 +195,13 @@ function formError(msg) { const p = $('admin-form-error'); p.textContent = msg |
 
 function setTab(t) {
   tab = t; editing = null; $('admin-form').reset(); formError(''); notice('');
-  for (const x of ['supply', 'demand']) { $('atab-' + x).setAttribute('aria-selected', x === t ? 'true' : 'false'); $('atab-' + x).tabIndex = x === t ? 0 : -1; }
+  for (const x of ['supply', 'demand', 'requests']) { $('atab-' + x).setAttribute('aria-selected', x === t ? 'true' : 'false'); $('atab-' + x).tabIndex = x === t ? 0 : -1; }
+  $('admin-listings-view').hidden = t === 'requests'; $('admin-requests-view').hidden = t !== 'requests';
   render(); counter();
 }
 $('atab-supply').addEventListener('click', () => setTab('supply'));
 $('atab-demand').addEventListener('click', () => setTab('demand'));
+$('atab-requests').addEventListener('click', () => setTab('requests'));
 
 const sel = $('f-commodity');
 for (const c of data.commodities) { const o = document.createElement('option'); o.value = c.slug; o.textContent = c.name; sel.append(o); }
@@ -262,6 +279,69 @@ $('admin-import-btn').addEventListener('click', async () => {
     show('admin-signin'); $('admin-error').textContent = 'Could not reach the sign-in service (' + (err.message || err) + ').'; $('admin-error').hidden = false;
   }
 })();
+
+/* ---------- requests from visitors ---------- */
+const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+function renderRequestBadge() {
+  const n = requests.filter((r) => r.status === 'pending').length;
+  const b = $('count-requests'); b.textContent = n; b.classList.toggle('has-new', n > 0);
+}
+function reqError(m) { const p = $('req-error'); p.textContent = m || ''; p.hidden = !m; }
+async function decide(r, status) {
+  reqError('');
+  let listing = null;
+  if (status === 'accepted') {
+    let slug = r.commodity;
+    if (slug === 'other') { const pick = document.getElementById('map-' + r.id); slug = pick ? pick.value : ''; if (!slug) { reqError('Choose the closest commodity for "' + (r.otherCommodity || 'this request') + '" before accepting.'); return; } }
+    const origin = /^any$/i.test(r.origin || '') ? '' : (r.origin || '');
+    listing = { type: r.kind, commodity: slug, origin, volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: (r.details || '') + (r.commodity === 'other' && r.otherCommodity ? (r.details ? ' ' : '') + '(' + r.otherCommodity + ')' : ''), added: isoDay() };
+    if (r.kind === 'demand') { listing.port = r.destination || ''; listing.country = ''; }
+    listing.details = listing.details.slice(0, 600);
+  }
+  try { await store.decide(r.id, status, listing); await load(); }
+  catch (err) { reqError('Could not save the decision (' + (err.code || err.message) + ').'); }
+}
+function renderRequests() {
+  for (const st of ['pending', 'accepted', 'rejected']) $('rc-' + st).textContent = requests.filter((r) => r.status === st).length;
+  [...$('req-filter').children].forEach((b) => b.setAttribute('aria-pressed', b.dataset.status === reqFilter ? 'true' : 'false'));
+  const box = $('req-list'); box.textContent = '';
+  const rows = requests.filter((r) => r.status === reqFilter).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const empty = $('req-empty'); empty.hidden = rows.length > 0;
+  empty.textContent = reqFilter === 'pending' ? 'No pending requests. New ones appear here as soon as someone sends one.' : 'Nothing here yet.';
+  for (const r of rows) {
+    const card = el('article', 'req-item');
+    const head = el('div', 'req-item-head');
+    head.append(el('span', 'mm-badge ' + (r.kind === 'supply' ? 'is-sup' : 'is-dem'), r.kind === 'supply' ? 'Supply offer' : 'Purchase request'));
+    head.append(el('span', 'req-date', r.createdAt ? 'Received ' + r.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' at ' + r.createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''));
+    card.append(head);
+    card.append(el('h3', 'req-name', r.commodity === 'other' ? (r.otherCommodity || 'Other') + ' (other)' : (names[r.commodity] || r.commodity)));
+    const grid = el('dl', 'req-grid');
+    const add = (k, v) => { if (!v) return; const d = el('div'); d.append(el('dt', null, k), el('dd', null, v)); grid.append(d); };
+    add('Origin', r.origin); add('Volume', r.volume); add('Quality', r.quality); add('Shipment', r.when); if (r.kind === 'demand') add('Destination', r.destination);
+    card.append(grid);
+    if (r.details) card.append(el('p', 'req-details', r.details));
+    const who = el('div', 'req-contact');
+    who.append(el('strong', null, r.name || 'Unknown'));
+    if (r.company) who.append(el('span', null, r.company));
+    if (r.email) { const a = el('a', null, r.email); a.href = 'mailto:' + encodeURIComponent(r.email).replace(/%40/g, '@'); who.append(a); }
+    if (r.phone) { const a = el('a', null, r.phone); a.href = 'tel:' + r.phone.replace(/[^+\d]/g, ''); who.append(a); }
+    card.append(who);
+    const act = el('div', 'req-actions');
+    if (reqFilter === 'pending') {
+      if (r.commodity === 'other') {
+        const lab = el('label', 'req-map', 'List it under ');
+        const pick = document.createElement('select'); pick.id = 'map-' + r.id;
+        const o0 = el('option', null, 'Choose a commodity'); o0.value = ''; pick.append(o0);
+        for (const c of data.commodities) { const o = el('option', null, c.name); o.value = c.slug; pick.append(o); }
+        lab.append(pick); act.append(lab);
+      }
+      act.append(button('Accept and publish', 'row-go row-go-solid', () => decide(r, 'accepted')), button('Reject', 'panel-showall admin-del', () => decide(r, 'rejected')));
+    } else if (reqFilter === 'rejected') act.append(button('Move back to pending', 'panel-showall', () => decide(r, 'pending')));
+    else act.append(el('span', 'req-date', 'Added to the ' + (r.kind === 'supply' ? 'supply' : 'demand') + ' list'));
+    card.append(act); box.append(card);
+  }
+}
+[...$('req-filter').children].forEach((b) => b.addEventListener('click', () => { reqFilter = b.dataset.status; renderRequests(); }));
 
 /* ---------- commodity slicer (same control as the public Commodities page) ---------- */
 (function slicer() {

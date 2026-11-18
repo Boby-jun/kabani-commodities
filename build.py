@@ -290,6 +290,26 @@ _ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3.4l1.6
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import phone_codes
 
+def phone_field(pid, label="Phone number"):
+    """Country-code list (flag, name, dial code) plus a number box. Behaviour lives in site.js (phoneField)."""
+    return f"""<div class="form-group">
+            <label for="{pid}">{label}</label>
+            <div class="phone" data-phone>
+              <div class="cc">
+                <button type="button" class="cc-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Country code"><span class="cc-flag" aria-hidden="true"></span><span class="cc-dial">+41</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                <div class="cc-panel" hidden>
+                  <input type="search" class="cc-search" placeholder="Search country or code" aria-label="Search country or code" autocomplete="off" />
+                  <ul class="cc-list" role="listbox" aria-label="Country codes"></ul>
+                </div>
+              </div>
+              <input id="{pid}" class="ph-input" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="79 123 45 67" required />
+              <input type="hidden" name="phone_code" class="cc-value" value="+41" />
+            </div>
+          </div>"""
+
+def phone_data():
+    return '<script type="application/json" id="cc-data">' + json.dumps(phone_codes.rows(), ensure_ascii=False) + '</script>'
+
 def contact():
     chips = "".join(f'<label class="ms-opt"><input type="checkbox" name="commodity" value="{E(c["name"])}" /><span>{E(c["name"])}</span></label>' for c in ITEMS)
     chips += '<label class="ms-opt"><input type="checkbox" name="commodity" value="Other" id="ms-other" /><span>Other</span></label>'
@@ -314,21 +334,7 @@ def contact():
             <div class="form-group"><label for="em">Email</label><input id="em" name="email" type="email" inputmode="email" placeholder="name@company.com" autocomplete="email" required /></div>
             <div class="form-group"><label for="co">Company</label><input id="co" name="company" type="text" placeholder="Your company" autocomplete="organization" required /></div>
           </div>
-          <div class="form-group">
-            <label for="ph">Phone number</label>
-            <div class="phone">
-              <div class="cc" id="cc">
-                <button type="button" class="cc-btn" id="cc-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Country code"><span class="cc-flag" id="cc-flag" aria-hidden="true"></span><span class="cc-dial" id="cc-dial">+41</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-                <div class="cc-panel" id="cc-panel" hidden>
-                  <input type="search" id="cc-search" class="cc-search" placeholder="Search country or code" aria-label="Search country or code" autocomplete="off" />
-                  <ul class="cc-list" id="cc-list" role="listbox" aria-label="Country codes"></ul>
-                </div>
-              </div>
-              <input id="ph" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="79 123 45 67" required />
-              <input type="hidden" name="phone_code" id="cc-value" value="+41" />
-            </div>
-            <script type="application/json" id="cc-data">{json.dumps(phone_codes.rows(), ensure_ascii=False)}</script>
-          </div>
+          {phone_field("ph")}
         </div>
         <div class="form-section">
           <div class="form-row form-row-top">
@@ -348,6 +354,7 @@ def contact():
         <button type="submit" class="form-submit">Send message</button>
         <div id="form-success" role="status" tabindex="-1" style="display:none">Thank you. We'll be in touch within 24 hours.</div>
       </form>
+      {phone_data()}
       <aside class="contact-aside">
         <h2>Geneva, Switzerland</h2>
         <div class="aside-block"><div class="aside-label">Email</div><a href="mailto:{EMAIL}">{EMAIL}</a><a class="aside-go" href="mailto:{EMAIL}">Write to us</a></div>
@@ -440,6 +447,8 @@ def market():
     listings = ([{"type": "supply", "commodity": r["commodity"], "volume": r["volume"], "origin": r["origin"], "quality": r["quality"], "when": r["when"]} for r in supply]
                 + [{"type": "demand", "commodity": r["commodity"], "volume": r["volume"], "origin": r.get("origin", ""), "quality": r.get("quality", ""), "when": r.get("when", ""), "port": r.get("port", ""), "country": r.get("country", ""), "sample": bool(r.get("sample"))} for r in demand])
     market_json = json.dumps({"commodities": [{"slug": c["slug"], "name": c["name"], "group": TOPIC_OF[c["slug"]]} for c in ITEMS], "topics": [{"id": i, "name": n, "slugs": s} for i, n, s in TOPICS], "listings": listings})
+    req_options = "".join(f'<option value="{c["slug"]}">{E(c["name"])}</option>' for c in ITEMS)
+    req_countries = "".join(f'<option value="{E(n)}"></option>' for n in sorted(MAPDATA["countries"].keys()))
     sample_note = ('<p class="market-sample">Example demand listings are shown for preview. Replace them in market.json before going live.</p>' if has_sample else "")
     empty = '<p class="market-empty" data-none="Nothing is listed here yet. <a href=&quot;contact.html&quot;>Tell us what you need</a> and we will look for the match." hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
     return head("Commodities — Supply & Demand — Kabani Commodities", "Current supply and demand across the commodities Kabani Commodities brokers.") + nav("market") + f"""
@@ -451,6 +460,7 @@ def market():
           <button type="button" role="tab" id="tab-supply" aria-controls="panel-supply" aria-selected="true">Supply <span>{len(supply)}</span></button>
           <button type="button" role="tab" id="tab-demand" aria-controls="panel-demand" aria-selected="false" tabindex="-1">Demand <span>{len(demand)}</span></button>
           <button type="button" role="tab" id="tab-map" aria-controls="panel-map" aria-selected="false" tabindex="-1">Map</button>
+          <button type="button" role="tab" id="tab-request" aria-controls="panel-request" aria-selected="false" tabindex="-1">Make a request</button>
         </div>
         <div class="market-tools">{slicer_html()}<button type="button" class="slicer-clear" id="slicer-clear" hidden>Clear</button></div>
       </div>
@@ -489,6 +499,48 @@ def market():
           </div>
         </div>
         <div class="mm-results" id="mm-results" aria-live="polite"></div>
+      </section>
+      <section class="market-panel" id="panel-request" data-type="request" role="tabpanel" aria-labelledby="tab-request" hidden>
+        <div class="req-card">
+          <h2 class="req-title">Commodities of interest</h2>
+          <p class="req-lead">Tell us what you want to supply or to buy. We review every request, and once we accept it, it appears in the supply or demand list and on the map.</p>
+          <form class="req-form" id="request-form" novalidate>
+            <div class="form-section">
+              <fieldset class="form-group"><legend>I want to</legend><div class="chip-row"><label class="chip"><input type="radio" name="kind" value="supply" required /><span>Supply a commodity</span></label><label class="chip"><input type="radio" name="kind" value="demand" required /><span>Buy a commodity</span></label></div></fieldset>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-commodity">Commodity</label><select id="rq-commodity" name="commodity" required><option value="">Choose a commodity</option>{req_options}<option value="other">Other</option></select></div>
+                <div class="form-group" id="rq-other-wrap" hidden><label for="rq-other">Which commodity?</label><input id="rq-other" name="other_commodity" type="text" maxlength="120" placeholder="e.g. Cocoa, cashew, maize" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-origin" id="rq-origin-l">Country of origin</label><input id="rq-origin" name="origin" type="text" maxlength="160" list="rq-countries" placeholder="Start typing, e.g. Kenya" required /></div>
+                <div class="form-group"><label for="rq-volume">Volume</label><input id="rq-volume" name="volume" type="text" maxlength="160" placeholder="e.g. 40 t per month, or 2 containers" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-quality">Quality / grade</label><input id="rq-quality" name="quality" type="text" maxlength="160" placeholder="e.g. Arabica AA, screen 17+" required /></div>
+                <div class="form-group"><label for="rq-when">Date of export / shipment</label><input id="rq-when" name="when" type="text" maxlength="160" placeholder="e.g. March 2027, or Flexible" required /></div>
+              </div>
+              <div class="form-group" id="rq-dest-wrap" hidden><label for="rq-dest">Destination (port or country)</label><input id="rq-dest" name="destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" /></div>
+              <div class="form-group"><label for="rq-details">More details</label><textarea id="rq-details" name="details" maxlength="600" rows="3" placeholder="Packaging, certifications, payment terms, samples, anything we should know."></textarea></div>
+            </div>
+            <div class="form-section">
+              <h3 class="req-sub">How can we reach you?</h3>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-name">Full name</label><input id="rq-name" name="name" type="text" maxlength="120" autocomplete="name" placeholder="e.g. Maria Keller" required /></div>
+                <div class="form-group"><label for="rq-company">Company</label><input id="rq-company" name="company" type="text" maxlength="120" autocomplete="organization" placeholder="Your company" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-email">Email</label><input id="rq-email" name="email" type="email" maxlength="160" autocomplete="email" placeholder="name@company.com" required /></div>
+                {phone_field("rq-ph")}
+              </div>
+              <div class="hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+            </div>
+            <datalist id="rq-countries">{req_countries}</datalist>
+            <button type="submit" class="form-submit">Send request</button>
+            <p class="req-note" id="rq-error" role="alert" hidden></p>
+            <div id="rq-success" role="status" tabindex="-1" hidden>Thank you. Your request was sent. We will contact you about the details before anything is published.</div>
+          </form>
+          {phone_data()}
+        </div>
       </section>
       <script type="application/json" id="market-data">{market_json}</script>
       <p class="market-foot">Looking for something that is not listed? <a href="contact.html">Contact us</a>. Origin for some commodities is shared on request. <span id="market-updated">Updated {updated}</span></p>
@@ -558,7 +610,23 @@ def admin():
         <div class="seg" role="tablist" aria-label="Supply or demand">
           <button type="button" role="tab" id="atab-supply" aria-selected="true">Supply <span id="count-supply">0</span></button>
           <button type="button" role="tab" id="atab-demand" aria-selected="false" tabindex="-1">Demand <span id="count-demand">0</span></button>
+          <button type="button" role="tab" id="atab-requests" aria-selected="false" tabindex="-1">Requests <span id="count-requests" class="req-badge">0</span></button>
         </div>
+        <section id="admin-requests-view" hidden>
+          <div class="admin-req-head">
+            <h2>Requests from visitors</h2>
+            <div class="seg seg-sm" id="req-filter" role="group" aria-label="Show requests">
+              <button type="button" data-status="pending" aria-pressed="true">Pending <span id="rc-pending">0</span></button>
+              <button type="button" data-status="accepted" aria-pressed="false">Accepted <span id="rc-accepted">0</span></button>
+              <button type="button" data-status="rejected" aria-pressed="false">Rejected <span id="rc-rejected">0</span></button>
+            </div>
+          </div>
+          <p class="admin-lead" id="req-lead">Supply offers and purchase requests sent from the Commodities page. Contact the person to confirm the details, then accept or reject. Accepting adds it to the supply or demand list and the map.</p>
+          <div id="req-list" class="req-list"></div>
+          <p class="market-empty" id="req-empty" hidden></p>
+          <p class="admin-error" id="req-error" role="alert" hidden></p>
+        </section>
+        <div id="admin-listings-view">
         <div class="admin-import" id="admin-import" hidden>
           <p>No live listings yet. Start from the supply list on the map?</p>
           <button type="button" class="row-go" id="admin-import-btn">Import current listings</button>
@@ -596,6 +664,7 @@ def admin():
         </table></div>
         <p class="market-empty" id="admin-empty" hidden></p>
         <p class="admin-wipe" id="admin-wipe-row" hidden><button type="button" class="panel-showall admin-del" id="admin-wipe">Delete all listings</button> <span>Removes every supply and demand listing at once. This cannot be undone.</span></p>
+        </div>
       </div>
     </div>
   </main>

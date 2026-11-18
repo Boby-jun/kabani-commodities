@@ -935,3 +935,80 @@
     .admin-bar .admin-user, .admin-bar #admin-email { color: rgba(244,243,238,0.88); }
     .admin-bar .panel-showall { background: transparent; color: var(--cream-soft); border-color: rgba(244,243,238,0.5); }
     .admin-bar .panel-showall:hover { border-color: #FFFFFF; color: #FFFFFF; }
+
+    /* ── Make a request (Commodities page) ── */
+    .market-tools[hidden] { display: none; }
+    .req-card { background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 44px 48px; box-shadow: 0 1px 2px rgba(26,31,33,0.05), 0 16px 40px -14px rgba(26,31,33,0.14); max-width: 820px; }
+    .req-title { font-size: 26px; font-weight: 700; letter-spacing: -0.015em; }
+    .req-lead { margin: 10px 0 34px; font-size: 15px; line-height: 1.7; color: var(--ink-soft); max-width: 62ch; }
+    .req-form { display: flex; flex-direction: column; gap: 40px; }
+    .req-form .form-section { display: flex; flex-direction: column; gap: 26px; }
+    .req-form .form-section + .form-section { padding-top: 40px; border-top: 1px solid var(--border); }
+    .req-sub { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+    .req-form .form-row { gap: 24px; }
+    .req-form .form-group { gap: 10px; }
+    .req-form .form-group label, .req-form .form-group legend { font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+    .req-form .form-group legend { margin-bottom: 14px; float: none; }
+    .req-form input[type=text], .req-form input[type=email], .req-form input[type=tel], .req-form select, .req-form textarea {
+      font-family: 'Montserrat', sans-serif; font-size: 15.5px; width: 100%; color: var(--ink); background: var(--white); border: 1px solid #8F9792; border-radius: 14px; padding: 15px 18px; min-height: 54px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .req-form select { appearance: none; padding-right: 44px; cursor: pointer; background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23585E5B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 16px center / 18px no-repeat; }
+    .req-form input:hover, .req-form select:hover, .req-form textarea:hover { border-color: var(--ink-soft); }
+    .req-form input:focus, .req-form select:focus, .req-form textarea:focus { border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .req-form input::placeholder, .req-form textarea::placeholder { color: #6A716D; }
+    .req-form textarea { min-height: 120px; line-height: 1.55; resize: vertical; }
+    .req-form .chip-row { gap: 12px; }
+    .req-form .chip { position: relative; cursor: pointer; }
+    .req-form .chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .req-form .chip span { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 20px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--ink); background: var(--cream-soft); border: 1px solid #C9CDC6; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    .req-form .chip:hover span { border-color: var(--tan); background: var(--white); }
+    .req-form .chip input:checked + span { background: var(--tan); border-color: var(--tan); color: var(--white); }
+    .req-form .chip input:focus-visible + span { outline: 3px solid var(--tan-light); outline-offset: 2px; }
+    .req-form .form-group[hidden] { display: none; }
+    .req-form .phone, .req-form .cc-panel { }
+    .req-form .phone { display: flex; gap: 10px; align-items: stretch; }
+    .req-form .phone > input.ph-input { flex: 1 1 auto; min-width: 0; }
+    .req-form .cc { position: relative; flex: none; }
+    .req-form .cc-btn { height: 100%; min-height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 16px; cursor: pointer; font: 600 15.5px 'Montserrat', sans-serif; color: var(--ink); background: var(--white); border: 1px solid #8F9792; border-radius: 14px; }
+    .req-form .cc-btn:hover { border-color: var(--ink-soft); }
+    .req-form .cc-btn:focus-visible, .req-form .cc-btn[aria-expanded="true"] { outline: none; border-color: var(--tan); box-shadow: 0 0 0 1px var(--tan), 0 0 0 5px var(--tan-pale); }
+    .req-form .cc-btn svg { width: 16px; height: 16px; fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .req-form .cc-flag { font-size: 22px; line-height: 1; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }
+    .req-form .cc-panel { position: absolute; left: 0; top: calc(100% + 8px); z-index: 40; width: min(380px, calc(100vw - 48px)); background: var(--white); border: 1px solid var(--border); border-radius: 18px; padding: 10px; box-shadow: 0 2px 6px rgba(26,31,33,0.06), 0 22px 44px -14px rgba(26,31,33,0.22); }
+    .req-form .cc-panel[hidden] { display: none; }
+    .req-form .cc-search { margin-bottom: 8px; min-height: 46px; padding: 12px 14px; font-size: 15px; border-radius: 12px; background: var(--cream-soft); border-color: var(--border); }
+    .req-form .cc-list { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow: auto; }
+    .req-form .cc-list li[hidden] { display: none; }
+    .req-form .cc-opt { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 10px; background: none; cursor: pointer; text-align: left; font: 500 14.5px 'Montserrat', sans-serif; color: var(--ink); }
+    .req-form .cc-opt:hover, .req-form .cc-opt:focus-visible { background: var(--cream-soft); outline: none; }
+    .req-form .cc-opt[aria-selected="true"] { background: var(--tan-pale); font-weight: 600; }
+    .req-form .cc-name { flex: 1 1 auto; min-width: 0; }
+    .req-form .cc-code { color: var(--ink-soft); }
+    .req-form .form-submit { align-self: flex-start; }
+    .req-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .req-note { font-size: 14px; font-weight: 600; color: #9B2C1F; margin: 0; }
+    .req-note[hidden], #rq-success[hidden] { display: none; }
+    #rq-success { font-size: 14.5px; line-height: 1.5; font-weight: 600; color: var(--tan); background: var(--tan-pale); border-radius: 14px; padding: 14px 18px; outline: none; }
+    @media (max-width: 720px) { .req-card { padding: 28px 20px; border-radius: 20px; } .req-form { gap: 34px; } .req-form .form-section + .form-section { padding-top: 34px; } .req-form .form-submit { align-self: stretch; min-height: 52px; } }
+
+    /* ── Admin: requests inbox ── */
+    .req-badge { min-width: 22px; text-align: center; }
+    .req-badge.has-new { background: #9B2C1F; color: #fff; }
+    .admin-req-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 4px 0 8px; }
+    .admin-req-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .req-list { display: flex; flex-direction: column; gap: 16px; margin-top: 18px; }
+    .req-item { background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 2px rgba(26,31,33,0.04); }
+    .req-item-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .req-date { font-size: 13px; color: var(--ink-soft); }
+    .req-name { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+    .req-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 24px; margin: 0; }
+    .req-grid dt { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-soft); }
+    .req-grid dd { margin: 2px 0 0; font-size: 15px; font-weight: 500; }
+    .req-details { font-size: 14.5px; line-height: 1.6; color: var(--ink); background: var(--cream-soft); border-radius: 12px; padding: 12px 14px; }
+    .req-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 14.5px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .req-contact a { color: var(--tan); font-weight: 600; text-underline-offset: 3px; }
+    .req-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .req-map { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .req-map select { font: 500 14px 'Montserrat', sans-serif; padding: 9px 12px; border-radius: 10px; border: 1px solid #8F9792; background: var(--white); }
+    #admin-requests-view[hidden], #admin-listings-view[hidden] { display: none; }

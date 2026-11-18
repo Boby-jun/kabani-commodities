@@ -8,5 +8,6 @@ window.KABANI_FIREBASE = {
   authDomain: "kabani-commodities.firebaseapp.com",
   projectId: "kabani-commodities",
   appId: "1:620220294784:web:184618f011f3df05886865",
-  ownerEmail: "rb@kabaniconsulting.com"
+  ownerEmail: "rb@kabaniconsulting.com",
+  notifyUrl: ""   // optional: a Formspree / Web3Forms address; when set, every new request is also emailed to you
 };
