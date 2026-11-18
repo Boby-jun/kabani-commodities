@@ -917,3 +917,13 @@
       .contact-banner { padding: 84px 0 540px; }
       .contact-layout { margin-top: -472px; }
     }
+
+    /* ── Map tab: slicers sit between Supply / Demand / Both and the legend, right above the map ── */
+    .mm-controls { gap: 12px 14px; }
+    .mm-slicers { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+    .mm-slicers .slicer { position: relative; }
+    .mm-slicers .slicer-panel, .mm-slicers .slicer-panel.col-panel { left: 0; right: auto; }
+    .mm-slicers .slicer:nth-child(n+5) .slicer-panel { left: auto; right: 0; }
+    .mm-slicers .slicer-btn { padding: 9px 12px; font-size: 13px; }
+    .mm-slicers .slicer-clear { margin-left: 2px; }
+    @media (max-width: 720px) { .mm-slicers { width: 100%; } .mm-slicers .slicer { position: static; } .mm-slicers .slicer-panel, .mm-slicers .slicer-panel.col-panel { left: 0; right: 0; width: auto; } }

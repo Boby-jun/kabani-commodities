@@ -476,6 +476,7 @@ def market():
             <button type="button" data-mode="demand" aria-pressed="false">Demand</button>
             <button type="button" data-mode="both" aria-pressed="true">Both</button>
           </div>
+          <div class="mm-slicers" id="mm-slicers"></div>
           <ul class="mm-legend" aria-label="Map colours"><li><i class="sw sw-sup"></i>Supply</li><li><i class="sw sw-dem"></i>Demand</li><li><i class="sw sw-both"></i>Both</li></ul>
         </div>
         <p class="market-sample" id="mm-sample" hidden>Example demand listings are shown for preview. Replace them in market.json before going live.</p>

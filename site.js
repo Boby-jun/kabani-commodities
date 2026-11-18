@@ -479,11 +479,14 @@ var MarketFilter = (function () {
     var inHeads = tab !== 'map' && !mq.matches && panelEl;
     var wraps = { commodity: first.closest('.slicer') };
     DIMS.forEach(function (d) { wraps[d[0]] = parts[d[0]].wrap; });
+    var mmS = document.getElementById('mm-slicers'), onMap = tab === 'map' && !!mmS;   // on the Map tab the slicers sit right above the map, beside Supply / Demand / Both
     Object.keys(wraps).forEach(function (k) {
       var th = inHeads ? panelEl.querySelector('thead th[data-dim="' + k + '"]') : null;
       if (th) { th.textContent = ''; th.appendChild(wraps[k]); th.classList.add('has-slicer'); }
+      else if (onMap) mmS.appendChild(wraps[k]);
       else if (wraps[k].parentNode !== tools) tools.insertBefore(wraps[k], clearBtn);
     });
+    if (onMap) mmS.appendChild(clearBtn); else if (clearBtn.parentNode !== tools || clearBtn.nextElementSibling) tools.appendChild(clearBtn);
     document.querySelectorAll('.market-panel thead th[data-dim]').forEach(function (th) {
       if (!th.firstElementChild) th.textContent = th.getAttribute('data-name') || th.textContent;
     });
