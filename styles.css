@@ -927,3 +927,11 @@
     .mm-slicers .slicer-btn { padding: 9px 12px; font-size: 13px; }
     .mm-slicers .slicer-clear { margin-left: 2px; }
     @media (max-width: 720px) { .mm-slicers { width: 100%; } .mm-slicers .slicer { position: static; } .mm-slicers .slicer-panel, .mm-slicers .slicer-panel.col-panel { left: 0; right: 0; width: auto; } }
+
+    /* Admin top bar: same bottle-green bar and reversed logo as the public pages */
+    .admin-bar { background: var(--tan); border-bottom: 0; }
+    .admin-bar .nav-logo { color: var(--cream-soft); }
+    .admin-bar .nav-logo span { color: var(--tan-light); }
+    .admin-bar .admin-user, .admin-bar #admin-email { color: rgba(244,243,238,0.88); }
+    .admin-bar .panel-showall { background: transparent; color: var(--cream-soft); border-color: rgba(244,243,238,0.5); }
+    .admin-bar .panel-showall:hover { border-color: #FFFFFF; color: #FFFFFF; }
