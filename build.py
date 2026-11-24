@@ -449,6 +449,7 @@ def market():
     market_json = json.dumps({"commodities": [{"slug": c["slug"], "name": c["name"], "group": TOPIC_OF[c["slug"]]} for c in ITEMS], "topics": [{"id": i, "name": n, "slugs": s} for i, n, s in TOPICS], "listings": listings})
     req_options = "".join(f'<option value="{c["slug"]}">{E(c["name"])}</option>' for c in ITEMS)
     req_countries = "".join(f'<option value="{E(n)}"></option>' for n in sorted(MAPDATA["countries"].keys()))
+    port_json = json.dumps(json.load(open(os.path.join(HERE, "ports.json"), encoding="utf-8")), ensure_ascii=False)
     spec_json = json.dumps(json.load(open(os.path.join(HERE, "commodity_specs.json"), encoding="utf-8")), ensure_ascii=False)
     sample_note = ('<p class="market-sample">Example demand listings are shown for preview. Replace them in market.json before going live.</p>' if has_sample else "")
     empty = '<p class="market-empty" data-none="Nothing is listed here yet. <a href=&quot;contact.html&quot;>Tell us what you need</a> and we will look for the match." hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
@@ -513,21 +514,26 @@ def market():
                 <div class="form-group" id="rq-other-wrap" hidden><label for="rq-other">Which commodity?</label><input id="rq-other" name="other_commodity" type="text" maxlength="120" placeholder="e.g. Cocoa, cashew, maize" /></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label for="rq-origin" id="rq-origin-l">Country of origin</label><input id="rq-origin" name="origin" type="text" maxlength="160" list="rq-countries" placeholder="Start typing, e.g. Kenya" required /></div>
+                <div class="form-group"><label for="rq-origin" id="rq-origin-l">Country of origin</label><input id="rq-origin" name="origin" type="text" maxlength="160" list="rq-countries" placeholder="Start typing, e.g. Kenya" autocomplete="off" required /></div>
+                <div class="form-group"><label for="rq-dcountry" id="rq-dcountry-l">Country of import</label><input id="rq-dcountry" name="destination_country" type="text" maxlength="160" list="rq-countries" placeholder="Start typing, e.g. Netherlands" autocomplete="off" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-pol">Port of loading <span class="opt">optional</span></label>
+                  <div class="combo" data-combo="port_loading"><input id="rq-pol" name="port_loading" type="text" maxlength="160" placeholder="Fills in from the origin, e.g. Mombasa" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rq-pol-list" /><button type="button" class="combo-btn" tabindex="-1" aria-label="Show the list of ports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="combo-panel" hidden><ul id="rq-pol-list" role="listbox"></ul></div></div></div>
+                <div class="form-group"><label for="rq-pod">Port of destination</label>
+                  <div class="combo" data-combo="port_destination"><input id="rq-pod" name="port_destination" type="text" maxlength="160" placeholder="Fills in from the country, e.g. Rotterdam" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rq-pod-list" required /><button type="button" class="combo-btn" tabindex="-1" aria-label="Show the list of ports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="combo-panel" hidden><ul id="rq-pod-list" role="listbox"></ul></div></div></div>
+              </div>
+              <div class="form-row">
                 <div class="form-group"><label for="rq-qty">Volume</label>
                   <div class="vol"><input id="rq-qty" name="volume_qty" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 40" required aria-label="Quantity" /><select id="rq-unit" name="volume_unit" required aria-label="Unit"><option value="">Unit</option></select></div></div>
-              </div>
-              <div class="form-row">
                 <div class="form-group"><label for="rq-when">Date of export / shipment</label><input id="rq-when" name="when" type="text" maxlength="160" placeholder="e.g. March 2027, or Flexible" required /></div>
+              </div>
+              <div class="form-row">
                 <div class="form-group"><label for="rq-freq">Frequency</label><select id="rq-freq" name="frequency" required><option value="">Choose</option><option>One-off shipment</option><option>Weekly</option><option>Every two weeks</option><option>Monthly</option><option>Quarterly</option><option>Yearly contract</option></select></div>
-              </div>
-              <div class="form-row">
                 <div class="form-group"><label for="rq-incoterm">Shipping terms (Incoterm)</label><select id="rq-incoterm" name="incoterm" required><option value="">Choose</option><option>EXW (Ex Works)</option><option>FCA (Free Carrier)</option><option>FOB (Free On Board)</option><option>CFR (Cost and Freight)</option><option>CIF (Cost, Insurance and Freight)</option><option>CIP (Carriage and Insurance Paid)</option><option>DAP (Delivered at Place)</option><option>DDP (Delivered Duty Paid)</option></select></div>
-                <div class="form-group"><label for="rq-payment">Payment terms</label><select id="rq-payment" name="payment" required><option value="">Choose</option><option>Letter of credit (L/C)</option><option>Bank transfer (T/T)</option><option>Cash against documents (CAD)</option><option>Open to discussion</option></select></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label for="rq-pol">Port of loading <span class="opt">optional</span></label><input id="rq-pol" name="port_loading" type="text" maxlength="160" placeholder="e.g. Mombasa, Kenya" /></div>
-                <div class="form-group"><label for="rq-pod">Port of destination</label><input id="rq-pod" name="port_destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" required /></div>
+                <div class="form-group"><label for="rq-payment">Payment terms</label><select id="rq-payment" name="payment" required><option value="">Choose</option><option>Letter of credit (L/C)</option><option>Bank transfer (T/T)</option><option>Cash against documents (CAD)</option><option>Open to discussion</option></select></div>
               </div>
               <div class="form-group" id="rq-specs-wrap" hidden>
                 <h3 class="req-sub2" id="rq-specs-title">Specifications</h3>
@@ -549,6 +555,7 @@ def market():
             </div>
             <datalist id="rq-countries">{req_countries}</datalist>
             <script type="application/json" id="spec-data">{spec_json}</script>
+            <script type="application/json" id="port-data">{port_json}</script>
             <button type="submit" class="form-submit">Send request</button>
             <p class="req-note" id="rq-error" role="alert" hidden></p>
             <div id="rq-success" role="status" tabindex="-1" hidden>Thank you. Your request was sent. We will contact you about the details before anything is published.</div>

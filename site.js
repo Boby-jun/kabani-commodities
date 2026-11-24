@@ -146,11 +146,60 @@ function handleContactForm(e) {
   function sync() {
     var isOther = commodity.value === 'other'; otherWrap.hidden = !isOther; other.required = isOther;
     originL.textContent = kind() === 'demand' ? 'Preferred country of origin (or Any)' : 'Country of origin';
+    document.getElementById('rq-dcountry-l').textContent = kind() === 'demand' ? 'Country of import' : 'Destination country';
   }
   commodity.addEventListener('change', function () { build(); sync(); });
   [].forEach.call(form.querySelectorAll('input[name="kind"]'), function (r) { r.addEventListener('change', sync); });
   form.addEventListener('reset', function () { setTimeout(function () { commodity.value = ''; build(); sync(); }, 0); });
   build(); sync();
+
+  /* Ports follow the country: the main port fills in by itself, the list holds the country's other ports, and the visitor can overwrite or pick. */
+  var PORTS = JSON.parse(document.getElementById('port-data').textContent), keys = {};
+  Object.keys(PORTS).forEach(function (k) { keys[k.toLowerCase()] = k; });
+  var WORLD = []; Object.keys(PORTS).forEach(function (k) { if (WORLD.indexOf(PORTS[k][0]) < 0) WORLD.push(PORTS[k][0]); }); WORLD.sort();
+  function portsFor(country) { var k = keys[String(country || '').trim().toLowerCase()]; return k ? PORTS[k] : null; }
+  var combos = [].map.call(form.querySelectorAll('.combo'), function (root) {
+    var input = root.querySelector('input'), btn = root.querySelector('.combo-btn'), panel = root.querySelector('.combo-panel'), ul = root.querySelector('ul');
+    var country = document.getElementById(root.getAttribute('data-combo') === 'port_loading' ? 'rq-origin' : 'rq-dcountry');
+    var lastAuto = '', edited = false;
+    function list() { return portsFor(country.value) || WORLD; }
+    function setOpen(o) { panel.hidden = !o; input.setAttribute('aria-expanded', o ? 'true' : 'false'); }
+    function render(filter) {
+      var q = (filter || '').toLowerCase(), known = portsFor(country.value); ul.textContent = '';
+      var items = list().filter(function (p) { return !q || p.toLowerCase().indexOf(q) >= 0; });
+      if (!known) { var h = document.createElement('li'); h.className = 'combo-hint'; h.textContent = 'Pick a country above to see its ports'; ul.appendChild(h); }
+      items.forEach(function (p, i) {
+        var li = document.createElement('li'); li.setAttribute('role', 'presentation');
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'combo-opt'; b.setAttribute('role', 'option'); b.textContent = p;
+        if (known && i === 0 && !q) { var tag = document.createElement('span'); tag.className = 'combo-main'; tag.textContent = 'main port'; b.appendChild(tag); }
+        if (p === input.value) b.setAttribute('aria-selected', 'true');
+        b.addEventListener('click', function () { input.value = p; edited = p !== lastAuto; setOpen(false); input.dispatchEvent(new Event('change')); input.focus(); });
+        li.appendChild(b); ul.appendChild(li);
+      });
+      if (!items.length) { var e = document.createElement('li'); e.className = 'combo-hint'; e.textContent = 'No match: keep your own entry'; ul.appendChild(e); }
+    }
+    function fromCountry() {
+      var ps = portsFor(country.value); if (!ps) return;
+      if (!edited || !input.value || input.value === lastAuto) { input.value = ps[0]; lastAuto = ps[0]; edited = false; }
+    }
+    country.addEventListener('input', fromCountry); country.addEventListener('change', fromCountry);
+    btn.addEventListener('click', function () { if (panel.hidden) { render(''); setOpen(true); } else setOpen(false); });
+    input.addEventListener('focus', function () { render(''); setOpen(true); });
+    input.addEventListener('input', function () { edited = input.value !== lastAuto; render(input.value); setOpen(true); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { render(panel.hidden ? '' : input.value === lastAuto ? '' : input.value); setOpen(true); var f = ul.querySelector('button'); if (f) f.focus(); e.preventDefault(); }
+      if (e.key === 'Escape') setOpen(false);
+    });
+    ul.addEventListener('keydown', function (e) {
+      var bs = [].slice.call(ul.querySelectorAll('button')), i = bs.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' && bs[i + 1]) { bs[i + 1].focus(); e.preventDefault(); }
+      if (e.key === 'ArrowUp') { if (i > 0) bs[i - 1].focus(); else input.focus(); e.preventDefault(); }
+      if (e.key === 'Escape') { setOpen(false); input.focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!panel.hidden && !root.contains(e.target)) setOpen(false); });
+    return { reset: function () { lastAuto = ''; edited = false; setOpen(false); } };
+  });
+  form.addEventListener('reset', function () { setTimeout(function () { combos.forEach(function (c) { c.reset(); }); }, 0); });
   function say(msg) { err.textContent = msg || ''; err.hidden = !msg; }
   function str(v) { return { stringValue: String(v == null ? '' : v).trim() }; }
   form.addEventListener('submit', function (e) {
@@ -163,7 +212,7 @@ function handleContactForm(e) {
     current.fields.forEach(function (f) { var val = v('spec_' + f.key); lines.push(f.label + ': ' + val); if (f.q) qual.push(val); });
     var data = { kind: kind(), commodity: v('commodity'), otherCommodity: v('other_commodity'), origin: v('origin'), volume: v('volume_qty') + ' ' + v('volume_unit'), volumeQty: v('volume_qty'), volumeUnit: v('volume_unit'),
       quality: qual.join(', ').slice(0, 160), specs: lines.join('\n').slice(0, 900), when: v('when'), frequency: v('frequency'), incoterm: v('incoterm'), payment: v('payment'),
-      portLoading: v('port_loading'), portDestination: v('port_destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
+      destinationCountry: v('destination_country'), portLoading: v('port_loading'), portDestination: v('port_destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
     var fields = {}; Object.keys(data).forEach(function (k) { fields[k] = str(data[k]); });
     fields.status = str('pending'); fields.createdAt = { timestampValue: new Date().toISOString() };
     var btn = form.querySelector('.form-submit'); btn.disabled = true;

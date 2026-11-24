@@ -1021,3 +1021,18 @@
     .req-form .form-group[hidden] { display: none; }
     @media (max-width: 720px) { .req-form .vol { grid-template-columns: 1fr 1fr; } }
     .req-form .opt { font-weight: 500; color: var(--ink-soft); margin-left: 6px; font-size: 12.5px; }
+
+    /* Port fields: type or pick from the country's ports */
+    .req-form .combo { position: relative; }
+    .req-form .combo input { padding-right: 52px; }
+    .req-form .combo-btn { position: absolute; right: 6px; top: 6px; bottom: 6px; width: 42px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: grid; place-items: center; }
+    .req-form .combo-btn:hover { background: var(--cream-soft); }
+    .req-form .combo-btn svg { width: 18px; height: 18px; fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .req-form .combo-panel { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 40; background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 8px; box-shadow: 0 2px 6px rgba(26,31,33,0.06), 0 22px 44px -14px rgba(26,31,33,0.22); }
+    .req-form .combo-panel[hidden] { display: none; }
+    .req-form .combo-panel ul { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow: auto; }
+    .req-form .combo-opt { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 10px; background: none; cursor: pointer; text-align: left; font: 500 14.5px 'Montserrat', sans-serif; color: var(--ink); }
+    .req-form .combo-opt:hover, .req-form .combo-opt:focus-visible { background: var(--cream-soft); outline: none; }
+    .req-form .combo-opt[aria-selected="true"] { background: var(--tan-pale); font-weight: 600; }
+    .req-form .combo-main { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tan); }
+    .req-form .combo-hint { padding: 10px 12px; font-size: 13.5px; color: var(--ink-soft); }
