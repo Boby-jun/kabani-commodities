@@ -30,7 +30,7 @@ service cloud.firestore {
 
     // Requests from visitors (Commodities page > Make a request). Anyone may send one; only the owner may read, decide or delete them.
     match /submissions/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['kind', 'commodity', 'otherCommodity', 'origin', 'volume', 'quality', 'when', 'destination', 'details', 'name', 'company', 'email', 'phone', 'volumeQty', 'volumeUnit', 'specs', 'incoterm', 'payment', 'status', 'createdAt'])
+      allow create: if request.resource.data.keys().hasOnly(['kind', 'commodity', 'otherCommodity', 'origin', 'volume', 'quality', 'when', 'destination', 'details', 'name', 'company', 'email', 'phone', 'volumeQty', 'volumeUnit', 'specs', 'incoterm', 'payment', 'frequency', 'portLoading', 'portDestination', 'status', 'createdAt'])
         && request.resource.data.status == 'pending'
         && request.resource.data.kind in ['supply', 'demand']
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 120
@@ -46,6 +46,9 @@ service cloud.firestore {
         && (!('volumeQty' in request.resource.data) || ok(request.resource.data.volumeQty))
         && (!('volumeUnit' in request.resource.data) || ok(request.resource.data.volumeUnit))
         && (!('incoterm' in request.resource.data) || ok(request.resource.data.incoterm))
+        && (!('frequency' in request.resource.data) || ok(request.resource.data.frequency))
+        && (!('portLoading' in request.resource.data) || ok(request.resource.data.portLoading))
+        && request.resource.data.portDestination is string && request.resource.data.portDestination.size() > 0 && ok(request.resource.data.portDestination)
         && (!('payment' in request.resource.data) || ok(request.resource.data.payment))
         && (!('specs' in request.resource.data) || (request.resource.data.specs is string && request.resource.data.specs.size() <= 900))
         && (!('details' in request.resource.data) || (request.resource.data.details is string && request.resource.data.details.size() <= 600));

@@ -519,15 +519,19 @@ def market():
               </div>
               <div class="form-row">
                 <div class="form-group"><label for="rq-when">Date of export / shipment</label><input id="rq-when" name="when" type="text" maxlength="160" placeholder="e.g. March 2027, or Flexible" required /></div>
+                <div class="form-group"><label for="rq-freq">Frequency</label><select id="rq-freq" name="frequency" required><option value="">Choose</option><option>One-off shipment</option><option>Weekly</option><option>Every two weeks</option><option>Monthly</option><option>Quarterly</option><option>Yearly contract</option></select></div>
+              </div>
+              <div class="form-row">
                 <div class="form-group"><label for="rq-incoterm">Shipping terms (Incoterm)</label><select id="rq-incoterm" name="incoterm" required><option value="">Choose</option><option>EXW (Ex Works)</option><option>FCA (Free Carrier)</option><option>FOB (Free On Board)</option><option>CFR (Cost and Freight)</option><option>CIF (Cost, Insurance and Freight)</option><option>CIP (Carriage and Insurance Paid)</option><option>DAP (Delivered at Place)</option><option>DDP (Delivered Duty Paid)</option></select></div>
+                <div class="form-group"><label for="rq-payment">Payment terms</label><select id="rq-payment" name="payment" required><option value="">Choose</option><option>Letter of credit (L/C)</option><option>Bank transfer (T/T)</option><option>Cash against documents (CAD)</option><option>Open to discussion</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-pol">Port of loading <span class="opt">optional</span></label><input id="rq-pol" name="port_loading" type="text" maxlength="160" placeholder="e.g. Mombasa, Kenya" /></div>
+                <div class="form-group"><label for="rq-pod">Port of destination</label><input id="rq-pod" name="port_destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" required /></div>
               </div>
               <div class="form-group" id="rq-specs-wrap" hidden>
                 <h3 class="req-sub2" id="rq-specs-title">Specifications</h3>
                 <div class="form-row rq-specs" id="rq-specs"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label for="rq-payment">Payment terms</label><select id="rq-payment" name="payment" required><option value="">Choose</option><option>Letter of credit (L/C)</option><option>Bank transfer (T/T)</option><option>Cash against documents (CAD)</option><option>Open to discussion</option></select></div>
-                <div class="form-group" id="rq-dest-wrap" hidden><label for="rq-dest">Destination (port or country)</label><input id="rq-dest" name="destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" /></div>
               </div>
               <div class="form-group"><label for="rq-details">More details</label><textarea id="rq-details" name="details" maxlength="600" rows="3" placeholder="Packaging, certifications, payment terms, samples, anything we should know."></textarea></div>
             </div>

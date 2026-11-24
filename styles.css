@@ -1020,3 +1020,4 @@
     .req-form .rq-specs { gap: 26px 24px; }
     .req-form .form-group[hidden] { display: none; }
     @media (max-width: 720px) { .req-form .vol { grid-template-columns: 1fr 1fr; } }
+    .req-form .opt { font-weight: 500; color: var(--ink-soft); margin-left: 6px; font-size: 12.5px; }

@@ -30,7 +30,7 @@ const picked = new Set(); // commodity slicer: nothing ticked shows everything
 
 /* ---------- data layers ---------- */
 const REQ_SAMPLE = [
-  { kind: 'demand', commodity: 'coffee', otherCommodity: '', origin: 'Ethiopia', volume: '2 20 ft containers', quality: 'Arabica, Screen 17/18', specs: 'Variety: Arabica\nGrade / screen size: Screen 17/18\nCrop year: 2026/27\nProcess: Washed\nCertifications: Fairtrade', incoterm: 'CIF (Cost, Insurance and Freight)', payment: 'Letter of credit (L/C)', when: 'Q1 2027', destination: 'Rotterdam, Netherlands', details: 'Samples must be approved before contract.', name: 'Maria Keller', company: 'Keller Roasters AG', email: 'maria@example.com', phone: '+41 79 123 45 67', status: 'pending', createdAt: new Date(Date.now() - 36e5 * 5) },
+  { kind: 'demand', commodity: 'coffee', otherCommodity: '', origin: 'Ethiopia', volume: '2 20 ft containers', quality: 'Arabica, Screen 17/18', specs: 'Variety: Arabica\nGrade / screen size: Screen 17/18\nCrop year: 2026/27\nProcess: Washed\nCertifications: Fairtrade', frequency: 'Monthly', incoterm: 'CIF (Cost, Insurance and Freight)', payment: 'Letter of credit (L/C)', portLoading: 'Djibouti', portDestination: 'Rotterdam, Netherlands', when: 'Q1 2027', destination: 'Rotterdam, Netherlands', details: 'Samples must be approved before contract.', name: 'Maria Keller', company: 'Keller Roasters AG', email: 'maria@example.com', phone: '+41 79 123 45 67', status: 'pending', createdAt: new Date(Date.now() - 36e5 * 5) },
   { kind: 'supply', commodity: 'other', otherCommodity: 'Cashew nuts', origin: 'Tanzania', volume: '1 container weekly', quality: 'W320 kernels', when: 'Flexible', destination: '', details: 'Packed in 22.68 kg cartons.', name: 'Joseph Mwangi', company: 'Mwangi Agro Ltd', email: 'joseph@example.com', phone: '+255 712 345 678', status: 'pending', createdAt: new Date(Date.now() - 36e5 * 30) },
 ];
 const SAMPLE = [
@@ -294,8 +294,8 @@ async function decide(r, status) {
     let slug = r.commodity;
     if (slug === 'other') { const pick = document.getElementById('map-' + r.id); slug = pick ? pick.value : ''; if (!slug) { reqError('Choose the closest commodity for "' + (r.otherCommodity || 'this request') + '" before accepting.'); return; } }
     const origin = /^any$/i.test(r.origin || '') ? '' : (r.origin || '');
-    listing = { type: r.kind, commodity: slug, origin, volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: [r.commodity === 'other' && r.otherCommodity ? r.otherCommodity : '', r.specs ? String(r.specs).split('\n').join('. ') : '', r.incoterm ? 'Terms: ' + r.incoterm : '', r.payment ? 'Payment: ' + r.payment : '', r.details || ''].filter(Boolean).join('. '), added: isoDay() };
-    if (r.kind === 'demand') { listing.port = r.destination || ''; listing.country = ''; }
+    listing = { type: r.kind, commodity: slug, origin, volume: r.volume || '', quality: r.quality || '', when: r.when || '', details: [r.commodity === 'other' && r.otherCommodity ? r.otherCommodity : '', r.specs ? String(r.specs).split('\n').join('. ') : '', r.frequency ? 'Frequency: ' + r.frequency : '', r.incoterm ? 'Terms: ' + r.incoterm : '', r.payment ? 'Payment: ' + r.payment : '', r.portLoading ? 'Port of loading: ' + r.portLoading : '', (r.kind === 'supply' && (r.portDestination || r.destination)) ? 'Port of destination: ' + (r.portDestination || r.destination) : '', r.details || ''].filter(Boolean).join('. '), added: isoDay() };
+    if (r.kind === 'demand') { listing.port = r.portDestination || r.destination || ''; listing.country = ''; }
     listing.details = listing.details.slice(0, 600);
   }
   try { await store.decide(r.id, status, listing); await load(); }
@@ -317,7 +317,7 @@ function renderRequests() {
     card.append(el('h3', 'req-name', r.commodity === 'other' ? (r.otherCommodity || 'Other') + ' (other)' : (names[r.commodity] || r.commodity)));
     const grid = el('dl', 'req-grid');
     const add = (k, v) => { if (!v) return; const d = el('div'); d.append(el('dt', null, k), el('dd', null, v)); grid.append(d); };
-    add('Origin', r.origin); add('Volume', r.volume); add('Quality', r.quality); add('Shipment', r.when); add('Shipping terms', r.incoterm); add('Payment', r.payment); if (r.kind === 'demand') add('Destination', r.destination);
+    add('Origin', r.origin); add('Volume', r.volume); add('Quality', r.quality); add('Shipment', r.when); add('Frequency', r.frequency); add('Shipping terms', r.incoterm); add('Payment', r.payment); add('Port of loading', r.portLoading); add('Port of destination', r.portDestination || r.destination);
     card.append(grid);
     if (r.specs) { const sp = el('dl', 'req-grid req-specs'); for (const line of String(r.specs).split('\n')) { const i = line.indexOf(': '); if (i < 0) continue; const d = el('div'); d.append(el('dt', null, line.slice(0, i)), el('dd', null, line.slice(i + 2))); sp.append(d); } card.append(sp); }
     if (r.details) card.append(el('p', 'req-details', r.details));

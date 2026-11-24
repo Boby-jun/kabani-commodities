@@ -120,7 +120,7 @@ function handleContactForm(e) {
   var cfg = window.KABANI_FIREBASE || {}, err = document.getElementById('rq-error'), ok = document.getElementById('rq-success');
   var SPEC = JSON.parse(document.getElementById('spec-data').textContent);
   var commodity = document.getElementById('rq-commodity'), otherWrap = document.getElementById('rq-other-wrap'), other = document.getElementById('rq-other');
-  var destWrap = document.getElementById('rq-dest-wrap'), dest = document.getElementById('rq-dest'), originL = document.getElementById('rq-origin-l');
+  var originL = document.getElementById('rq-origin-l');
   var unit = document.getElementById('rq-unit'), specsWrap = document.getElementById('rq-specs-wrap'), specsBox = document.getElementById('rq-specs'), specsTitle = document.getElementById('rq-specs-title');
   var current = SPEC.generic;
   function kind() { var c = form.querySelector('input[name="kind"]:checked'); return c ? c.value : ''; }
@@ -145,7 +145,7 @@ function handleContactForm(e) {
   }
   function sync() {
     var isOther = commodity.value === 'other'; otherWrap.hidden = !isOther; other.required = isOther;
-    var buy = kind() === 'demand'; destWrap.hidden = !buy; dest.required = buy; originL.textContent = buy ? 'Preferred country of origin (or Any)' : 'Country of origin';
+    originL.textContent = kind() === 'demand' ? 'Preferred country of origin (or Any)' : 'Country of origin';
   }
   commodity.addEventListener('change', function () { build(); sync(); });
   [].forEach.call(form.querySelectorAll('input[name="kind"]'), function (r) { r.addEventListener('change', sync); });
@@ -162,8 +162,8 @@ function handleContactForm(e) {
     var qual = [], lines = [];
     current.fields.forEach(function (f) { var val = v('spec_' + f.key); lines.push(f.label + ': ' + val); if (f.q) qual.push(val); });
     var data = { kind: kind(), commodity: v('commodity'), otherCommodity: v('other_commodity'), origin: v('origin'), volume: v('volume_qty') + ' ' + v('volume_unit'), volumeQty: v('volume_qty'), volumeUnit: v('volume_unit'),
-      quality: qual.join(', ').slice(0, 160), specs: lines.join('\n').slice(0, 900), when: v('when'), incoterm: v('incoterm'), payment: v('payment'),
-      destination: v('destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
+      quality: qual.join(', ').slice(0, 160), specs: lines.join('\n').slice(0, 900), when: v('when'), frequency: v('frequency'), incoterm: v('incoterm'), payment: v('payment'),
+      portLoading: v('port_loading'), portDestination: v('port_destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
     var fields = {}; Object.keys(data).forEach(function (k) { fields[k] = str(data[k]); });
     fields.status = str('pending'); fields.createdAt = { timestampValue: new Date().toISOString() };
     var btn = form.querySelector('.form-submit'); btn.disabled = true;
