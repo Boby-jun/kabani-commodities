@@ -114,20 +114,43 @@ function handleContactForm(e) {
   }
 })();
 
-/* Commodities page, "Make a request": saves a supply offer or a purchase request for review (and emails it when a notify address is set up). */
+/* Commodities page, "Make a request": the questions follow the commodity (units, specifications). Saves the request for review and emails it when a notify address is set up. */
 (function requestForm() {
   var form = document.getElementById('request-form'); if (!form) return;
   var cfg = window.KABANI_FIREBASE || {}, err = document.getElementById('rq-error'), ok = document.getElementById('rq-success');
+  var SPEC = JSON.parse(document.getElementById('spec-data').textContent);
   var commodity = document.getElementById('rq-commodity'), otherWrap = document.getElementById('rq-other-wrap'), other = document.getElementById('rq-other');
-  var destWrap = document.getElementById('rq-dest-wrap'), originL = document.getElementById('rq-origin-l');
+  var destWrap = document.getElementById('rq-dest-wrap'), dest = document.getElementById('rq-dest'), originL = document.getElementById('rq-origin-l');
+  var unit = document.getElementById('rq-unit'), specsWrap = document.getElementById('rq-specs-wrap'), specsBox = document.getElementById('rq-specs'), specsTitle = document.getElementById('rq-specs-title');
+  var current = SPEC.generic;
   function kind() { var c = form.querySelector('input[name="kind"]:checked'); return c ? c.value : ''; }
+  function opt(txt, val) { var o = document.createElement('option'); o.value = val == null ? txt : val; o.textContent = txt; return o; }
+  function build() {
+    var slug = commodity.value; current = SPEC[slug] || SPEC.generic;
+    var keep = unit.value; unit.textContent = ''; unit.appendChild(opt('Unit', ''));
+    current.units.forEach(function (u) { unit.appendChild(opt(u)); });
+    if (current.units.indexOf(keep) >= 0) unit.value = keep; else if (current.units.length === 1) unit.value = current.units[0];
+    specsBox.textContent = '';
+    current.fields.forEach(function (f, i) {
+      var g = document.createElement('div'); g.className = 'form-group'; var id = 'rq-s-' + f.key;
+      var l = document.createElement('label'); l.htmlFor = id; l.textContent = f.label; g.appendChild(l);
+      var c;
+      if (f.options) { c = document.createElement('select'); c.appendChild(opt('Choose', '')); f.options.forEach(function (o) { c.appendChild(opt(o)); }); }
+      else { c = document.createElement('input'); c.type = 'text'; c.maxLength = 120; c.placeholder = f.placeholder || ''; }
+      c.id = id; c.name = 'spec_' + f.key; c.required = true; g.appendChild(c); specsBox.appendChild(g);
+    });
+    var name = slug ? (commodity.options[commodity.selectedIndex].textContent) : '';
+    specsTitle.textContent = slug && slug !== 'other' ? 'Specifications for ' + name.toLowerCase() : 'Specifications';
+    specsWrap.hidden = !slug;
+  }
   function sync() {
     var isOther = commodity.value === 'other'; otherWrap.hidden = !isOther; other.required = isOther;
-    var buy = kind() === 'demand'; destWrap.hidden = !buy; originL.textContent = buy ? 'Preferred country of origin (or Any)' : 'Country of origin';
+    var buy = kind() === 'demand'; destWrap.hidden = !buy; dest.required = buy; originL.textContent = buy ? 'Preferred country of origin (or Any)' : 'Country of origin';
   }
-  commodity.addEventListener('change', sync);
+  commodity.addEventListener('change', function () { build(); sync(); });
   [].forEach.call(form.querySelectorAll('input[name="kind"]'), function (r) { r.addEventListener('change', sync); });
-  form.addEventListener('reset', function () { setTimeout(sync, 0); });
+  form.addEventListener('reset', function () { setTimeout(function () { commodity.value = ''; build(); sync(); }, 0); });
+  build(); sync();
   function say(msg) { err.textContent = msg || ''; err.hidden = !msg; }
   function str(v) { return { stringValue: String(v == null ? '' : v).trim() }; }
   form.addEventListener('submit', function (e) {
@@ -136,7 +159,10 @@ function handleContactForm(e) {
     if (!form.checkValidity()) { form.reportValidity(); return; }
     if (!cfg.projectId || !cfg.apiKey) { say('Requests are not switched on yet. Please use the contact form.'); return; }
     var v = function (n) { return form.elements[n] ? form.elements[n].value.trim() : ''; };
-    var data = { kind: kind(), commodity: v('commodity'), otherCommodity: v('other_commodity'), origin: v('origin'), volume: v('volume'), quality: v('quality'), when: v('when'),
+    var qual = [], lines = [];
+    current.fields.forEach(function (f) { var val = v('spec_' + f.key); lines.push(f.label + ': ' + val); if (f.q) qual.push(val); });
+    var data = { kind: kind(), commodity: v('commodity'), otherCommodity: v('other_commodity'), origin: v('origin'), volume: v('volume_qty') + ' ' + v('volume_unit'), volumeQty: v('volume_qty'), volumeUnit: v('volume_unit'),
+      quality: qual.join(', ').slice(0, 160), specs: lines.join('\n').slice(0, 900), when: v('when'), incoterm: v('incoterm'), payment: v('payment'),
       destination: v('destination'), details: v('details'), name: v('name'), company: v('company'), email: v('email'), phone: (v('phone_code') + ' ' + v('phone')).trim() };
     var fields = {}; Object.keys(data).forEach(function (k) { fields[k] = str(data[k]); });
     fields.status = str('pending'); fields.createdAt = { timestampValue: new Date().toISOString() };

@@ -449,6 +449,7 @@ def market():
     market_json = json.dumps({"commodities": [{"slug": c["slug"], "name": c["name"], "group": TOPIC_OF[c["slug"]]} for c in ITEMS], "topics": [{"id": i, "name": n, "slugs": s} for i, n, s in TOPICS], "listings": listings})
     req_options = "".join(f'<option value="{c["slug"]}">{E(c["name"])}</option>' for c in ITEMS)
     req_countries = "".join(f'<option value="{E(n)}"></option>' for n in sorted(MAPDATA["countries"].keys()))
+    spec_json = json.dumps(json.load(open(os.path.join(HERE, "commodity_specs.json"), encoding="utf-8")), ensure_ascii=False)
     sample_note = ('<p class="market-sample">Example demand listings are shown for preview. Replace them in market.json before going live.</p>' if has_sample else "")
     empty = '<p class="market-empty" data-none="Nothing is listed here yet. <a href=&quot;contact.html&quot;>Tell us what you need</a> and we will look for the match." hidden>Nothing listed for this selection right now. <button type="button" class="slicer-link" data-clear>Show all commodities</button> or <a href="contact.html">tell us what you need</a>.</p>'
     return head("Commodities — Supply & Demand — Kabani Commodities", "Current supply and demand across the commodities Kabani Commodities brokers.") + nav("market") + f"""
@@ -513,13 +514,21 @@ def market():
               </div>
               <div class="form-row">
                 <div class="form-group"><label for="rq-origin" id="rq-origin-l">Country of origin</label><input id="rq-origin" name="origin" type="text" maxlength="160" list="rq-countries" placeholder="Start typing, e.g. Kenya" required /></div>
-                <div class="form-group"><label for="rq-volume">Volume</label><input id="rq-volume" name="volume" type="text" maxlength="160" placeholder="e.g. 40 t per month, or 2 containers" required /></div>
+                <div class="form-group"><label for="rq-qty">Volume</label>
+                  <div class="vol"><input id="rq-qty" name="volume_qty" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 40" required aria-label="Quantity" /><select id="rq-unit" name="volume_unit" required aria-label="Unit"><option value="">Unit</option></select></div></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label for="rq-quality">Quality / grade</label><input id="rq-quality" name="quality" type="text" maxlength="160" placeholder="e.g. Arabica AA, screen 17+" required /></div>
                 <div class="form-group"><label for="rq-when">Date of export / shipment</label><input id="rq-when" name="when" type="text" maxlength="160" placeholder="e.g. March 2027, or Flexible" required /></div>
+                <div class="form-group"><label for="rq-incoterm">Shipping terms (Incoterm)</label><select id="rq-incoterm" name="incoterm" required><option value="">Choose</option><option>EXW (Ex Works)</option><option>FCA (Free Carrier)</option><option>FOB (Free On Board)</option><option>CFR (Cost and Freight)</option><option>CIF (Cost, Insurance and Freight)</option><option>CIP (Carriage and Insurance Paid)</option><option>DAP (Delivered at Place)</option><option>DDP (Delivered Duty Paid)</option></select></div>
               </div>
-              <div class="form-group" id="rq-dest-wrap" hidden><label for="rq-dest">Destination (port or country)</label><input id="rq-dest" name="destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" /></div>
+              <div class="form-group" id="rq-specs-wrap" hidden>
+                <h3 class="req-sub2" id="rq-specs-title">Specifications</h3>
+                <div class="form-row rq-specs" id="rq-specs"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rq-payment">Payment terms</label><select id="rq-payment" name="payment" required><option value="">Choose</option><option>Letter of credit (L/C)</option><option>Bank transfer (T/T)</option><option>Cash against documents (CAD)</option><option>Open to discussion</option></select></div>
+                <div class="form-group" id="rq-dest-wrap" hidden><label for="rq-dest">Destination (port or country)</label><input id="rq-dest" name="destination" type="text" maxlength="160" placeholder="e.g. Rotterdam, Netherlands" /></div>
+              </div>
               <div class="form-group"><label for="rq-details">More details</label><textarea id="rq-details" name="details" maxlength="600" rows="3" placeholder="Packaging, certifications, payment terms, samples, anything we should know."></textarea></div>
             </div>
             <div class="form-section">
@@ -535,6 +544,7 @@ def market():
               <div class="hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
             </div>
             <datalist id="rq-countries">{req_countries}</datalist>
+            <script type="application/json" id="spec-data">{spec_json}</script>
             <button type="submit" class="form-submit">Send request</button>
             <p class="req-note" id="rq-error" role="alert" hidden></p>
             <div id="rq-success" role="status" tabindex="-1" hidden>Thank you. Your request was sent. We will contact you about the details before anything is published.</div>

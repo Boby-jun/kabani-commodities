@@ -949,7 +949,7 @@
     .req-form .form-group { gap: 10px; }
     .req-form .form-group label, .req-form .form-group legend { font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
     .req-form .form-group legend { margin-bottom: 14px; float: none; }
-    .req-form input[type=text], .req-form input[type=email], .req-form input[type=tel], .req-form select, .req-form textarea {
+    .req-form input[type=text], .req-form input[type=email], .req-form input[type=tel], .req-form input[type=number], .req-form select, .req-form textarea {
       font-family: 'Montserrat', sans-serif; font-size: 15.5px; width: 100%; color: var(--ink); background: var(--white); border: 1px solid #8F9792; border-radius: 14px; padding: 15px 18px; min-height: 54px; outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -1012,3 +1012,11 @@
     .req-map { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
     .req-map select { font: 500 14px 'Montserrat', sans-serif; padding: 9px 12px; border-radius: 10px; border: 1px solid #8F9792; background: var(--white); }
     #admin-requests-view[hidden], #admin-listings-view[hidden] { display: none; }
+
+    /* Make a request: number + unit, and the commodity-specific questions */
+    .req-form .vol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; }
+    .req-form .vol input[type=number] { -moz-appearance: textfield; }
+    .req-sub2 { font-size: 15px; font-weight: 700; margin: 0 0 16px; color: var(--tan); }
+    .req-form .rq-specs { gap: 26px 24px; }
+    .req-form .form-group[hidden] { display: none; }
+    @media (max-width: 720px) { .req-form .vol { grid-template-columns: 1fr 1fr; } }

@@ -1,0 +1,108 @@
+{
+  "_note": "What the Make a request form asks for, per commodity: the units the volume can be given in, and the specification questions. 'q' fields feed the Quality column of the listing. Edit freely, then run: python3 -I build.py",
+  "generic": {
+    "units": ["tonnes (MT)", "kg", "20 ft containers", "litres", "barrels", "pieces"],
+    "fields": [
+      {"key": "grade", "label": "Quality / grade", "placeholder": "e.g. grade, purity or size", "q": true}
+    ]
+  },
+  "coffee": {
+    "units": ["tonnes (MT)", "60 kg bags", "20 ft containers"],
+    "fields": [
+      {"key": "variety", "label": "Variety", "options": ["Arabica", "Robusta"], "q": true},
+      {"key": "grade", "label": "Grade / screen size", "placeholder": "e.g. Screen 17/18", "q": true},
+      {"key": "crop", "label": "Crop year", "placeholder": "e.g. 2026/27"},
+      {"key": "process", "label": "Process", "options": ["Washed", "Natural", "Honey"]},
+      {"key": "cert", "label": "Certifications", "placeholder": "e.g. Fairtrade, Organic, none"}
+    ]
+  },
+  "tea": {
+    "units": ["tonnes (MT)", "kg", "20 ft containers"],
+    "fields": [
+      {"key": "type", "label": "Type", "options": ["Black CTC", "Black orthodox", "Green", "White", "Other"], "q": true},
+      {"key": "grade", "label": "Grade", "placeholder": "e.g. BP1, PF1, PD", "q": true},
+      {"key": "pack", "label": "Packaging", "options": ["Paper sacks", "Tea chests", "Bulk bags", "Retail packs"]}
+    ]
+  },
+  "avocado": {
+    "units": ["tonnes (MT)", "4 kg cartons", "pallets", "20 ft reefer containers"],
+    "fields": [
+      {"key": "variety", "label": "Variety", "options": ["Hass", "Fuerte", "Other"], "q": true},
+      {"key": "size", "label": "Size (fruit count per carton)", "placeholder": "e.g. count 16 to 22", "q": true},
+      {"key": "dm", "label": "Minimum dry matter %", "placeholder": "e.g. 23%"},
+      {"key": "pack", "label": "Packaging", "options": ["4 kg cartons", "10 kg cartons", "Other"]}
+    ]
+  },
+  "macadamia": {
+    "units": ["tonnes (MT)", "kg", "20 ft containers"],
+    "fields": [
+      {"key": "form", "label": "Form", "options": ["In-shell (NIS)", "Kernel"], "q": true},
+      {"key": "style", "label": "Style / grade", "placeholder": "e.g. Style 1S, Style 4S", "q": true},
+      {"key": "moisture", "label": "Maximum moisture %", "placeholder": "e.g. 1.5%"}
+    ]
+  },
+  "flowers": {
+    "units": ["stems", "boxes", "pallets"],
+    "fields": [
+      {"key": "variety", "label": "Flower and variety", "placeholder": "e.g. Rose, Red Naomi", "q": true},
+      {"key": "length", "label": "Stem length (cm)", "placeholder": "e.g. 50 to 60", "q": true},
+      {"key": "colour", "label": "Colour", "placeholder": "e.g. red, mixed"},
+      {"key": "freq", "label": "How often", "options": ["One-off", "Weekly", "Monthly"]}
+    ]
+  },
+  "poultry": {
+    "units": ["tonnes (MT)", "cartons", "20 ft reefer containers"],
+    "fields": [
+      {"key": "cut", "label": "Cut", "options": ["Whole chicken", "Leg quarters", "Wings", "Breast", "Feet", "Mixed cuts"], "q": true},
+      {"key": "cond", "label": "Condition", "options": ["Frozen", "Chilled"], "q": true},
+      {"key": "halal", "label": "Halal certified", "options": ["Required", "Not required"]}
+    ]
+  },
+  "urea": {
+    "units": ["tonnes (MT)", "50 kg bags", "20 ft containers"],
+    "fields": [
+      {"key": "form", "label": "Form", "options": ["Granular", "Prilled"], "q": true},
+      {"key": "n", "label": "Minimum nitrogen (N) %", "placeholder": "e.g. 46%", "q": true},
+      {"key": "pack", "label": "Packaging", "options": ["Bulk", "50 kg bags", "1 MT jumbo bags"]}
+    ]
+  },
+  "biochar": {
+    "units": ["tonnes (MT)", "cubic metres (m³)", "1 MT big bags"],
+    "fields": [
+      {"key": "feed", "label": "Feedstock", "placeholder": "e.g. wood, rice husk, coconut shell", "q": true},
+      {"key": "carbon", "label": "Minimum fixed carbon %", "placeholder": "e.g. 70%", "q": true},
+      {"key": "size", "label": "Particle size", "placeholder": "e.g. 0 to 10 mm"},
+      {"key": "pack", "label": "Packaging", "options": ["Bulk", "Big bags", "25 kg bags"]}
+    ]
+  },
+  "sulphur": {
+    "units": ["tonnes (MT)", "20 ft containers"],
+    "fields": [
+      {"key": "form", "label": "Form", "options": ["Granular", "Prilled", "Lump", "Powder"], "q": true},
+      {"key": "purity", "label": "Minimum purity %", "placeholder": "e.g. 99.9%", "q": true},
+      {"key": "pack", "label": "Packaging", "options": ["Bulk", "Bags", "Big bags"]}
+    ]
+  },
+  "oil": {
+    "units": ["barrels (bbl)", "tonnes (MT)", "cubic metres (m³)", "litres"],
+    "fields": [
+      {"key": "product", "label": "Product", "options": ["Crude oil", "Diesel (D2)", "Jet A1", "Fuel oil", "Other"], "q": true},
+      {"key": "api", "label": "API gravity", "placeholder": "e.g. 38° API", "q": true},
+      {"key": "sulphur", "label": "Maximum sulphur %", "placeholder": "e.g. 0.5%"}
+    ]
+  },
+  "copper": {
+    "units": ["tonnes (MT)", "kg"],
+    "fields": [
+      {"key": "form", "label": "Form", "options": ["Cathode", "Concentrate", "Scrap", "Wire rod"], "q": true},
+      {"key": "purity", "label": "Copper content / purity %", "placeholder": "e.g. 99.99%", "q": true}
+    ]
+  },
+  "iron": {
+    "units": ["tonnes (MT)"],
+    "fields": [
+      {"key": "form", "label": "Form", "options": ["Fines", "Lump", "Pellets", "Concentrate"], "q": true},
+      {"key": "fe", "label": "Fe content %", "placeholder": "e.g. 62% Fe", "q": true}
+    ]
+  }
+}
